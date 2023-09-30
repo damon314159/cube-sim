@@ -29,6 +29,31 @@ class Cube {
       11: [11, 0],
       12: [12, 0]
     }
+
+    this.cornerCubies = {
+      1: ['white', 'green', 'orange'],
+      2: ['white', 'orange', 'blue'],
+      3: ['white', 'blue', 'red'],
+      4: ['white', 'red', 'green'],
+      5: ['yellow', 'orange', 'green'],
+      6: ['yellow', 'blue', 'orange'],
+      7: ['yellow', 'red', 'blue'],
+      8: ['yellow', 'green', 'red']
+    }
+    this.edgeCubies = {
+      1: ['white', 'orange'],
+      2: ['blue', 'white'],
+      3: ['white', 'red'],
+      4: ['green', 'white'],
+      5: ['orange', 'green'],
+      6: ['orange', 'blue'],
+      7: ['red', 'blue'],
+      8: ['red', 'green'],
+      9: ['yellow', 'orange'],
+      10: ['blue', 'yellow'],
+      11: ['yellow', 'red'],
+      12: ['green', 'yellow']
+    }
   }
 
   #fourCycle(type, positionA, positionB, positionC, positionD, polar = false) {
@@ -122,9 +147,70 @@ class Cube {
   }
 
   // General puzzle methods
-  isSolved() {}
+  isSolved() {
+    let solved = true
+    // Check edges
+    Object.keys(this.edges).every((position) => {
+      const [cubie, orientation] = this.edges[position]
+      if (cubie !== parseInt(position, 10) || orientation !== 0) {
+        solved = false
+        return false
+      }
+      return true
+    })
 
-  scramble() {}
+    // Check corners only if the edges were okay
+    if (solved) {
+      Object.keys(this.corners).every((position) => {
+        const [cubie, orientation] = this.corners[position]
+        if (cubie !== parseInt(position, 10) || orientation !== 0) {
+          solved = false
+          return false
+        }
+        return true
+      })
+    }
+
+    return solved
+  }
+
+  scramble() {
+    this.scrambleEdges()
+    this.scrambleCorners()
+  }
+
+  scrambleEdges() {
+    const positions = Object.keys(this.edges)
+    this.shuffleArray(positions)
+    for (let i = 0; i < positions.length - 1; i += 1) {
+      this.edges[positions[i]][1] = Math.floor(Math.random() * 2) // Random orientation
+    }
+    // Calculate the sum of the first 11 orientations modulo 2
+    const sumMod2 = positions.slice(0, -1).reduce((sum, position) => sum + this.edges[position][1], 0) % 2
+    // Assign the calculated orientation to the last edge
+    this.edges[positions[positions.length - 1]][1] = sumMod2
+  }
+
+  scrambleCorners() {
+    const positions = Object.keys(this.corners)
+    this.shuffleArray(positions)
+    for (let i = 0; i < positions.length - 1; i += 1) {
+      this.corners[positions[i]][1] = Math.floor(Math.random() * 3) // Random orientation
+    }
+    // Calculate the sum of the first 7 orientations modulo 23
+    const sumMod3 = positions.slice(0, -1).reduce((sum, position) => sum + this.edges[position][1], 0) % 3
+    // Assign the calculated orientation to the last edge
+    this.corners[positions[positions.length - 1]][1] = sumMod3
+  }
+
+  // Fisher-Yates shuffle
+  static shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1))
+      // eslint-disable-next-line no-param-reassign
+      ;[array[i], array[j]] = [array[j], array[i]]
+    }
+  }
 }
 
 export default Cube
