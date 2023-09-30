@@ -2,20 +2,20 @@ class Cube {
   constructor() {
     this.corners = {
       // Position: [cubie, orientation]
-      // Positions are numbered 0-7, cubies 0-7, and orientations 0-2
-      0: [0, 0],
+      // Positions are numbered 1-8, cubies 1-8, and orientations 0-2
+
       1: [1, 0],
       2: [2, 0],
       3: [3, 0],
       4: [4, 0],
       5: [5, 0],
       6: [6, 0],
-      7: [7, 0]
+      7: [7, 0],
+      8: [8, 0]
     }
     this.edges = {
       // Position: [cubie, orientation]
-      // Position are numbered 0-11, cubies 0-11, and orientations 0-1
-      0: [0, 0],
+      // Position are numbered 1-12, cubies 1-12, and orientations 0-1
       1: [1, 0],
       2: [2, 0],
       3: [3, 0],
@@ -26,7 +26,8 @@ class Cube {
       8: [8, 0],
       9: [9, 0],
       10: [10, 0],
-      11: [11, 0]
+      11: [11, 0],
+      12: [12, 0]
     }
   }
 
@@ -50,10 +51,10 @@ class Cube {
     // Change parity for corners
     if (type === 'corners' && !polar) {
       ;[positionA, positionC].forEach((piece) => {
-        this.corners[piece][1] = (this.corners[piece][1] + 1) % 3
+        this.corners[piece][1] = (this.corners[piece][1] + 2) % 3
       })
       ;[positionB, positionD].forEach((piece) => {
-        this.corners[piece][1] = (this.corners[piece][1] + 2) % 3
+        this.corners[piece][1] = (this.corners[piece][1] + 1) % 3
       })
     }
   }
