@@ -200,7 +200,7 @@ class Cube {
     // Calculate the sum of the first 7 orientations modulo 23
     const sumMod3 = positions.slice(0, -1).reduce((sum, position) => sum + this.edges[position][1], 0) % 3
     // Assign the calculated orientation to the last edge
-    this.corners[positions[positions.length - 1]][1] = sumMod3
+    this.corners[positions[positions.length - 1]][1] = (3 - sumMod3) % 3
   }
 
   // Fisher-Yates shuffle
