@@ -29,7 +29,7 @@ function createCubieWireframe(cubie) {
 // Function to create a cubie geometry based on its position
 function createCubieGeometry(x, y, z, cubieSize) {
   const materials = [
-    new THREE.MeshBasicMaterial({ color: 0xffffff }), // Internals - Black
+    new THREE.MeshBasicMaterial({ color: 0x000000 }), // Internals - Black
     new THREE.MeshBasicMaterial({ color: 0x017eff }), // Right - Blue
     new THREE.MeshBasicMaterial({ color: 0x00e202 }), // Left - Green
     new THREE.MeshBasicMaterial({ color: 0xffffff }), // Up - White
@@ -46,6 +46,19 @@ function createCubieGeometry(x, y, z, cubieSize) {
     z > 0 ? materials[5] : materials[0],
     z < 0 ? materials[6] : materials[0]
   ]
+
+  // Cubies in the center of a given face have zeroes in exactly two coordinates
+  const isCenter = (x === 0) + (y === 0) + (z === 0) === 2
+  if (isCenter) {
+    cubieMaterials.forEach((material) => {
+      // If a face of a center cubie is non-black, it is the clickable coloured face
+      if (material.color.r !== 0 || material.color.g !== 0 || material.color.b !== 0) {
+        // Name clickable cubies' material for click handling purposes
+        material.name = 'centerCubie'
+      }
+    })
+  }
+
   const cubieGeometry = new THREE.BoxGeometry(cubieSize, cubieSize, cubieSize)
   return new THREE.Mesh(cubieGeometry, cubieMaterials)
 }
@@ -78,11 +91,14 @@ window.addEventListener('resize', () => {
 let isDragging = false
 let previousMousePosition = { x: 0, y: 0 }
 document.addEventListener('mousedown', (event) => {
+  if (event.button !== 2) return // Only proceed for right mouse button
   isDragging = true
   previousMousePosition = {
     x: event.clientX,
     y: event.clientY
   }
+  // Prevent the default behavior of the right mouse button
+  event.preventDefault()
 })
 
 document.addEventListener('mouseup', () => {
@@ -192,6 +208,56 @@ function rotateFace(face, direction = 'c') {
   }
 }
 
+// Handle clicks for face turns
+function onMouseClick(event) {
+  // Filter out non-left clicks
+  if (event.button !== 0) {
+    return
+  }
+  const isShiftHeld = event.shiftKey
+
+  // Calculate mouse coordinates
+  const mouse = new THREE.Vector2()
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
+
+  // Create a raycaster and check for intersections
+  const raycaster = new THREE.Raycaster()
+  raycaster.setFromCamera(mouse, camera)
+
+  const intersects = raycaster.intersectObjects(cubeGroup.children, true)
+  for (let i = 0; i < intersects.length; i += 1) {
+    // Find the first raycast intersection that is a face
+    if (intersects[i].face) {
+      // Test that cubie for being a center cubie
+      let isCenter = false
+      intersects[i].object.material.some((material) => {
+        if (material.name === 'centerCubie') {
+          isCenter = true
+          return true // Breaks out of the some loop
+        }
+        return false
+      })
+      // If it was a center cubie, determine which, and perform the turn
+      if (isCenter) {
+        let face
+        console.log(intersects, i, intersects[i])
+        const [x, y, z] = Object.values(intersects[i].normal)
+        if (x === 1) face = 'r'
+        if (x === -1) face = 'l'
+        if (y === 1) face = 'u'
+        if (y === -1) face = 'd'
+        if (z === 1) face = 'f'
+        if (z === -1) face = 'b'
+        rotateFace(face, isShiftHeld ? 'i' : 'c')
+      }
+      // Stop checking the ray here since any other intersections are background
+      break
+    }
+  }
+}
+renderer.domElement.addEventListener('click', onMouseClick)
+
 // Initial rotation to show front, right, and top faces
 cubeGroup.rotation.set(toRadians(30), toRadians(-35), 0)
 // Create an animation loop
@@ -201,3 +267,5 @@ function animate() {
 }
 
 animate()
+
+export default rotateFace //Change this to export the turns performed instead of the algo
