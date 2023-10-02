@@ -131,64 +131,57 @@ function rotateFace(face, direction = 'c') {
   const tempSubGroup = new THREE.Group()
   // Iterate through cubies in cubeGroup
   const rotationAmount = ((direction === 'i' ? 1 : -1) * Math.PI) / 2
+  function getConditionFunction(face) {
+    switch (face) {
+      case 'r':
+        return (cubie) => cubie.position.x > 0
+      case 'l':
+        return (cubie) => cubie.position.x < 0
+      case 'u':
+        return (cubie) => cubie.position.y > 0
+      case 'd':
+        return (cubie) => cubie.position.y < 0
+      case 'f':
+        return (cubie) => cubie.position.z > 0
+      case 'b':
+        return (cubie) => cubie.position.z < 0
+      default:
+        return () => false
+    }
+  }
+
+  const conditionFunction = getConditionFunction(face)
+  for (let i = cubeGroup.children.length - 1; i >= 0; i -= 1) {
+    const cubie = cubeGroup.children[i]
+    if (conditionFunction(cubie)) {
+      tempSubGroup.add(cubie)
+    }
+  }
+
+  // Adjust rotation based on the face
   switch (face) {
     case 'r':
-      for (let i = cubeGroup.children.length - 1; i >= 0; i -= 1) {
-        const cubie = cubeGroup.children[i]
-        if (cubie.position.x > 0) {
-          tempSubGroup.add(cubie)
-        }
-      }
       tempSubGroup.rotation.x += rotationAmount
       break
     case 'l':
-      for (let i = cubeGroup.children.length - 1; i >= 0; i -= 1) {
-        const cubie = cubeGroup.children[i]
-        if (cubie.position.x < 0) {
-          tempSubGroup.add(cubie)
-        }
-      }
       tempSubGroup.rotation.x -= rotationAmount
       break
     case 'u':
-      for (let i = cubeGroup.children.length - 1; i >= 0; i -= 1) {
-        const cubie = cubeGroup.children[i]
-        if (cubie.position.y > 0) {
-          tempSubGroup.add(cubie)
-        }
-      }
       tempSubGroup.rotation.y += rotationAmount
       break
     case 'd':
-      for (let i = cubeGroup.children.length - 1; i >= 0; i -= 1) {
-        const cubie = cubeGroup.children[i]
-        if (cubie.position.y < 0) {
-          tempSubGroup.add(cubie)
-        }
-      }
       tempSubGroup.rotation.y -= rotationAmount
       break
     case 'f':
-      for (let i = cubeGroup.children.length - 1; i >= 0; i -= 1) {
-        const cubie = cubeGroup.children[i]
-        if (cubie.position.z > 0) {
-          tempSubGroup.add(cubie)
-        }
-      }
       tempSubGroup.rotation.z += rotationAmount
       break
     case 'b':
-      for (let i = cubeGroup.children.length - 1; i >= 0; i -= 1) {
-        const cubie = cubeGroup.children[i]
-        if (cubie.position.z < 0) {
-          tempSubGroup.add(cubie)
-        }
-      }
       tempSubGroup.rotation.z -= rotationAmount
       break
     default:
       break
   }
+
   // Update the rotation and position of each cubie in the temporary subgroup
   tempSubGroup.children.forEach((cubie) => {
     cubie.rotation.setFromQuaternion(
@@ -241,7 +234,6 @@ function onMouseClick(event) {
       // If it was a center cubie, determine which, and perform the turn
       if (isCenter) {
         let face
-        console.log(intersects, i, intersects[i])
         const [x, y, z] = Object.values(intersects[i].normal)
         if (x === 1) face = 'r'
         if (x === -1) face = 'l'
