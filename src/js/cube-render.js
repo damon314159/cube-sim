@@ -87,6 +87,11 @@ window.addEventListener('resize', () => {
   renderer.setSize(newWidth, newHeight)
 })
 
+// Suppress standard right click menu
+document.addEventListener('contextmenu', (event) => {
+  event.preventDefault()
+})
+
 // Handle mouse dragging
 let isDragging = false
 let previousMousePosition = { x: 0, y: 0 }
