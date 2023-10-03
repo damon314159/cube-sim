@@ -1,4 +1,7 @@
 import * as THREE from 'three'
+import Cube from './Cube'
+
+const cube = new Cube()
 
 function toRadians(degrees) {
   return degrees * (Math.PI / 180)
@@ -136,8 +139,8 @@ function rotateFace(face, direction = 'c') {
   const tempSubGroup = new THREE.Group()
   // Iterate through cubies in cubeGroup
   const rotationAmount = ((direction === 'i' ? 1 : -1) * Math.PI) / 2
-  function getConditionFunction(face) {
-    switch (face) {
+  function getConditionFunction(conditionFace) {
+    switch (conditionFace) {
       case 'r':
         return (cubie) => cubie.position.x > 0
       case 'l':
@@ -247,6 +250,7 @@ function onMouseClick(event) {
         if (z === 1) face = 'f'
         if (z === -1) face = 'b'
         rotateFace(face, isShiftHeld ? 'i' : 'c')
+        cube[`turn${face.toUpperCase()}${isShiftHeld ? 'i' : ''}`]()
       }
       // Stop checking the ray here since any other intersections are background
       break
@@ -254,6 +258,13 @@ function onMouseClick(event) {
   }
 }
 renderer.domElement.addEventListener('click', onMouseClick)
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') {
+    // Call cube.isSolved and alert the result
+    alert(`Is the cube solved? ${cube.isSolved() ? 'Yes' : 'No'}`)
+  }
+})
 
 // Initial rotation to show front, right, and top faces
 cubeGroup.rotation.set(toRadians(30), toRadians(-35), 0)
@@ -264,5 +275,3 @@ function animate() {
 }
 
 animate()
-
-export default rotateFace //Change this to export the turns performed instead of the algo

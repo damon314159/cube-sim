@@ -30,30 +30,31 @@ class Cube {
       12: [12, 0]
     }
 
-    this.cornerCubies = {
-      1: ['white', 'green', 'orange'],
-      2: ['white', 'orange', 'blue'],
-      3: ['white', 'blue', 'red'],
-      4: ['white', 'red', 'green'],
-      5: ['yellow', 'orange', 'green'],
-      6: ['yellow', 'blue', 'orange'],
-      7: ['yellow', 'red', 'blue'],
-      8: ['yellow', 'green', 'red']
-    }
-    this.edgeCubies = {
-      1: ['white', 'orange'],
-      2: ['blue', 'white'],
-      3: ['white', 'red'],
-      4: ['green', 'white'],
-      5: ['orange', 'green'],
-      6: ['orange', 'blue'],
-      7: ['red', 'blue'],
-      8: ['red', 'green'],
-      9: ['yellow', 'orange'],
-      10: ['blue', 'yellow'],
-      11: ['yellow', 'red'],
-      12: ['green', 'yellow']
-    }
+    // To be used with the scramble method when that is implemented in the render
+    // this.cornerCubies = {
+    //   1: ['white', 'green', 'orange'],
+    //   2: ['white', 'orange', 'blue'],
+    //   3: ['white', 'blue', 'red'],
+    //   4: ['white', 'red', 'green'],
+    //   5: ['yellow', 'orange', 'green'],
+    //   6: ['yellow', 'blue', 'orange'],
+    //   7: ['yellow', 'red', 'blue'],
+    //   8: ['yellow', 'green', 'red']
+    // }
+    // this.edgeCubies = {
+    //   1: ['white', 'orange'],
+    //   2: ['blue', 'white'],
+    //   3: ['white', 'red'],
+    //   4: ['green', 'white'],
+    //   5: ['orange', 'green'],
+    //   6: ['orange', 'blue'],
+    //   7: ['red', 'blue'],
+    //   8: ['red', 'green'],
+    //   9: ['yellow', 'orange'],
+    //   10: ['blue', 'yellow'],
+    //   11: ['yellow', 'red'],
+    //   12: ['green', 'yellow']
+    // }
   }
 
   #fourCycle(type, positionA, positionB, positionC, positionD, polar = false) {
