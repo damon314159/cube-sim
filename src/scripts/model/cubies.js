@@ -16,8 +16,14 @@ export class Edge extends Cubie {
     FLIPPED: "flipped",
   };
 
-  constructor(colour1, colour2, orientation = Edge.ORIENTATIONS.SOLVED) {
+  constructor(
+    colour1,
+    colour2,
+    startingPosition,
+    orientation = Edge.ORIENTATIONS.SOLVED,
+  ) {
     super([colour1, colour2]);
+    this.startingPosition = startingPosition; // for calculating parity
     this.orientation = orientation;
   }
 }
@@ -25,6 +31,7 @@ export class Edge extends Cubie {
 export class Corner extends Cubie {
   static ORIENTATIONS = {
     SOLVED: "solved",
+    // Note these CW and ACW values are deliberately duplicated from the enum in ../constants/directions, as they are conceptually isolated
     CLOCKWISE: "clockwise", // rotate one turn CW from solved
     ANTI_CLOCKWISE: "anti-clockwise", // opposite of above
   };
@@ -34,9 +41,11 @@ export class Corner extends Cubie {
     colour1,
     colour2,
     colour3,
+    startingPosition,
     orientation = Corner.ORIENTATIONS.SOLVED,
   ) {
     super([colour1, colour2, colour3]);
+    this.startingPosition = startingPosition; // for calculating parity
     this.orientation = orientation;
   }
 }

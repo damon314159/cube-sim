@@ -1,18 +1,31 @@
-import { COLOURS } from "./colour-scheme.js";
+import { COLOURS } from "../constants/colour-scheme.js";
 import { Centre, Corner, Edge } from "./cubies.js";
 
 class Cube {
-  constructor(size = 3) {
-    this.corners = [
-      new Corner(COLOURS.TOP, COLOURS.RIGHT, COLOURS.FRONT),
-      new Corner(COLOURS.TOP, COLOURS.FRONT, COLOURS.LEFT),
-      new Corner(COLOURS.TOP, COLOURS.LEFT, COLOURS.BACK),
-      new Corner(COLOURS.TOP, COLOURS.BACK, COLOURS.RIGHT),
-      new Corner(COLOURS.BOTTOM, COLOURS.FRONT, COLOURS.RIGHT),
-      new Corner(COLOURS.BOTTOM, COLOURS.LEFT, COLOURS.FRONT),
-      new Corner(COLOURS.BOTTOM, COLOURS.BACK, COLOURS.LEFT),
-      new Corner(COLOURS.BOTTOM, COLOURS.RIGHT, COLOURS.BACK),
+  static FACES = {
+    TOP: "top",
+    BOTTOM: "bottom",
+    FRONT: "front",
+    BACK: "back",
+    LEFT: "left",
+    RIGHT: "right",
+  };
+
+  constructor() {
+    const cornerColourTriples = [
+      [COLOURS.TOP, COLOURS.RIGHT, COLOURS.FRONT],
+      [COLOURS.TOP, COLOURS.FRONT, COLOURS.LEFT],
+      [COLOURS.TOP, COLOURS.LEFT, COLOURS.BACK],
+      [COLOURS.TOP, COLOURS.BACK, COLOURS.RIGHT],
+      [COLOURS.BOTTOM, COLOURS.FRONT, COLOURS.RIGHT],
+      [COLOURS.BOTTOM, COLOURS.LEFT, COLOURS.FRONT],
+      [COLOURS.BOTTOM, COLOURS.BACK, COLOURS.LEFT],
+      [COLOURS.BOTTOM, COLOURS.RIGHT, COLOURS.BACK],
     ];
+    this.corners = cornerColourTriples.map(
+      ([colour1, colour2, colour3], index) =>
+        new Corner(colour1, colour2, colour3, index),
+    );
 
     const edgeColourPairs = [
       [COLOURS.TOP, COLOURS.FRONT],
@@ -28,9 +41,8 @@ class Cube {
       [COLOURS.LEFT, COLOURS.BACK],
       [COLOURS.BACK, COLOURS.RIGHT],
     ];
-    const cubiesPerEdge = size - 2;
-    this.edges = edgeColourPairs.map(([colour1, colour2]) =>
-      Array.from({ length: cubiesPerEdge }, () => new Edge(colour1, colour2)),
+    this.edges = edgeColourPairs.map(
+      ([colour1, colour2], index) => new Edge(colour1, colour2, index),
     );
 
     const centreColours = [
@@ -41,25 +53,11 @@ class Cube {
       COLOURS.BACK,
       COLOURS.RIGHT,
     ];
-    const cubiesPerCentre = (size - 2) ** 2;
-    this.centres = centreColours.map((colour) =>
-      Array.from({ length: cubiesPerCentre }, () => new Centre(colour)),
-    );
+    this.centres = centreColours.map((colour) => new Centre(colour));
   }
 
-  #fourCycle(type, positionA, positionB, positionC, positionD, polar = false) {
-    // Change positions cyclically
-    [
-      this[type][positionA],
-      this[type][positionB],
-      this[type][positionC],
-      this[type][positionD],
-    ] = [
-      this[type][positionD].slice(),
-      this[type][positionA].slice(),
-      this[type][positionB].slice(),
-      this[type][positionC].slice(),
-    ];
+  #faceTurn(face) {
+    const cornersToExchange = new Map();
 
     // Change parity for edges
     if (type === "edges") {
@@ -82,64 +80,64 @@ class Cube {
 
   // Clockwise Turns
   turnU() {
-    this.#fourCycle("edges", 1, 2, 3, 4);
-    this.#fourCycle("corners", 1, 2, 3, 4, true);
+    // this.#fourCycle("edges", 1, 2, 3, 4);
+    // this.#fourCycle("corners", 1, 2, 3, 4, true);
   }
 
   turnD() {
-    this.#fourCycle("edges", 9, 12, 11, 10);
-    this.#fourCycle("corners", 5, 8, 7, 6, true);
+    // this.#fourCycle("edges", 9, 12, 11, 10);
+    // this.#fourCycle("corners", 5, 8, 7, 6, true);
   }
 
   turnR() {
-    this.#fourCycle("edges", 2, 6, 10, 7);
-    this.#fourCycle("corners", 3, 2, 6, 7);
+    // this.#fourCycle("edges", 2, 6, 10, 7);
+    // this.#fourCycle("corners", 3, 2, 6, 7);
   }
 
   turnF() {
-    this.#fourCycle("edges", 3, 7, 11, 8);
-    this.#fourCycle("corners", 4, 3, 7, 8);
+    // this.#fourCycle("edges", 3, 7, 11, 8);
+    // this.#fourCycle("corners", 4, 3, 7, 8);
   }
 
   turnL() {
-    this.#fourCycle("edges", 4, 8, 12, 5);
-    this.#fourCycle("corners", 1, 4, 8, 5);
+    // this.#fourCycle("edges", 4, 8, 12, 5);
+    // this.#fourCycle("corners", 1, 4, 8, 5);
   }
 
   turnB() {
-    this.#fourCycle("edges", 1, 5, 9, 6);
-    this.#fourCycle("corners", 2, 1, 5, 6);
+    // this.#fourCycle("edges", 1, 5, 9, 6);
+    // this.#fourCycle("corners", 2, 1, 5, 6);
   }
 
   // Anticlockwise (inverted) turns
   turnUi() {
-    this.#fourCycle("edges", 1, 4, 3, 2);
-    this.#fourCycle("corners", 1, 4, 3, 2, true);
+    // this.#fourCycle("edges", 1, 4, 3, 2);
+    // this.#fourCycle("corners", 1, 4, 3, 2, true);
   }
 
   turnDi() {
-    this.#fourCycle("edges", 9, 10, 11, 12);
-    this.#fourCycle("corners", 5, 6, 7, 8, true);
+    // this.#fourCycle("edges", 9, 10, 11, 12);
+    // this.#fourCycle("corners", 5, 6, 7, 8, true);
   }
 
   turnRi() {
-    this.#fourCycle("edges", 2, 7, 10, 6);
-    this.#fourCycle("corners", 3, 7, 6, 2);
+    // this.#fourCycle("edges", 2, 7, 10, 6);
+    // this.#fourCycle("corners", 3, 7, 6, 2);
   }
 
   turnFi() {
-    this.#fourCycle("edges", 3, 8, 11, 7);
-    this.#fourCycle("corners", 4, 8, 7, 3);
+    // this.#fourCycle("edges", 3, 8, 11, 7);
+    // this.#fourCycle("corners", 4, 8, 7, 3);
   }
 
   turnLi() {
-    this.#fourCycle("edges", 4, 5, 12, 8);
-    this.#fourCycle("corners", 1, 5, 8, 4);
+    // this.#fourCycle("edges", 4, 5, 12, 8);
+    // this.#fourCycle("corners", 1, 5, 8, 4);
   }
 
   turnBi() {
-    this.#fourCycle("edges", 1, 6, 9, 5);
-    this.#fourCycle("corners", 2, 6, 5, 1);
+    // this.#fourCycle("edges", 1, 6, 9, 5);
+    // this.#fourCycle("corners", 2, 6, 5, 1);
   }
 
   // General puzzle methods
