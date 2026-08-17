@@ -26,6 +26,13 @@ export class Edge extends Cubie {
     this.startingPosition = startingPosition; // for calculating parity
     this.orientation = orientation;
   }
+
+  flip() {
+    this.orientation =
+      this.orientation === Edge.ORIENTATIONS.SOLVED
+        ? Edge.ORIENTATIONS.FLIPPED
+        : Edge.ORIENTATIONS.SOLVED;
+  }
 }
 
 export class Corner extends Cubie {
@@ -47,5 +54,17 @@ export class Corner extends Cubie {
     super([colour1, colour2, colour3]);
     this.startingPosition = startingPosition; // for calculating parity
     this.orientation = orientation;
+  }
+
+  rotate(increments) {
+    const orderedOrientations = [
+      Corner.ORIENTATIONS.SOLVED,
+      Corner.ORIENTATIONS.CLOCKWISE,
+      Corner.ORIENTATIONS.ANTI_CLOCKWISE,
+    ];
+    const currentIndex = orderedOrientations.indexOf(this.orientation);
+    const newIndex = (currentIndex + increments) % 3;
+    const newOrientation = orderedOrientations[newIndex];
+    this.orientation = newOrientation;
   }
 }

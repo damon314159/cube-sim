@@ -75,15 +75,19 @@ class Cube {
 
     cycleArrayElementsAtIndices(this.corners, positionsToCycle);
 
-    // // Change parity for corners
-    // if (type === "corners" && !polar) {
-    //   [positionA, positionC].forEach((piece) => {
-    //     this.corners[piece][1] = (this.corners[piece][1] + 2) % 3;
-    //   });
-    //   [positionB, positionD].forEach((piece) => {
-    //     this.corners[piece][1] = (this.corners[piece][1] + 1) % 3;
-    //   });
-    // }
+    // corners naturally rotate as turns are made, we need to update their orientations
+    const rotationIncrementsPerPosition = new Map([
+      [Cube.FACES.TOP, [0, 0, 0, 0]],
+      [Cube.FACES.BOTTOM, [0, 0, 0, 0]],
+      [Cube.FACES.FRONT, [2, 1, 2, 1]],
+      [Cube.FACES.LEFT, [2, 1, 2, 1]],
+      [Cube.FACES.BACK, [2, 1, 2, 1]],
+      [Cube.FACES.RIGHT, [2, 1, 2, 1]],
+    ]).get(face);
+    rotationIncrementsPerPosition.forEach((increment, index) => {
+      const corner = this.corners[positionsToCycle[index]];
+      corner.rotate(increment);
+    });
   }
 
   #faceTurnEdges(face, direction) {
@@ -102,13 +106,21 @@ class Cube {
 
     cycleArrayElementsAtIndices(this.edges, positionsToCycle);
 
-    // // Change parity for edges
-    // if (type === "edges") {
-    //   [positionA, positionB, positionC, positionD].forEach((position) => {
-    //     const pieceState = this.edges[position];
-    //     pieceState[1] = (pieceState[1] + 1) % 2; // Flip parity
-    //   });
-    // }
+    // edges naturally flip as turns are made, we need to update their orientations
+    const shouldFlipPerPosition = new Map([
+      [Cube.FACES.TOP, [true, true, true, true]],
+      [Cube.FACES.BOTTOM, [true, true, true, true]],
+      [Cube.FACES.FRONT, [true, true, true, true]],
+      [Cube.FACES.LEFT, [true, true, true, true]],
+      [Cube.FACES.BACK, [true, true, true, true]],
+      [Cube.FACES.RIGHT, [true, true, true, true]],
+    ]).get(face);
+    shouldFlipPerPosition.forEach((shouldFlip, index) => {
+      const edge = this.edges[positionsToCycle[index]];
+      if (shouldFlip) {
+        edge.flip();
+      }
+    });
   }
 
   #faceTurn(face, direction) {
