@@ -190,27 +190,25 @@ class Cube {
   // ---
 
   isSolved() {
-    let solved = true;
+    const cornersSolved = this.corners.every(
+      (corner, index) =>
+        corner.startingPosition === index &&
+        corner.orientation === Corner.ORIENTATIONS.SOLVED,
+    );
+    if (!cornersSolved) {
+      return false;
+    }
 
-    this.edges.forEach((edge, index) => {
-      if (
-        edge.startingPosition !== index ||
-        edge.orientation !== Edge.ORIENTATIONS.SOLVED
-      ) {
-        solved = false;
-      }
-    });
+    const edgesSolved = this.edges.every(
+      (edge, index) =>
+        edge.startingPosition === index &&
+        edge.orientation === Edge.ORIENTATIONS.SOLVED,
+    );
+    if (!edgesSolved) {
+      return false;
+    }
 
-    this.corners.forEach((corner, index) => {
-      if (
-        corner.startingPosition !== index ||
-        corner.orientation !== Corner.ORIENTATIONS.SOLVED
-      ) {
-        solved = false;
-      }
-    });
-
-    return solved;
+    return true;
   }
 
   // The scramble logic from the original implementation needs fixing, it doesn't account for even/odd parity with respect to permutations
