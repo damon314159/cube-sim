@@ -59,8 +59,8 @@ class Cube {
     this.centres = centreColours.map((colour) => new Centre({ colour }));
   }
 
-  #faceTurn(face, direction) {
-    const cornerPositionsToCycleClockwise = new Map([
+  #faceTurnCorners(face, direction) {
+    const positionsToCycleClockwise = new Map([
       [Cube.FACES.TOP, [0, 1, 2, 3]],
       [Cube.FACES.BOTTOM, [7, 6, 5, 4]],
       [Cube.FACES.FRONT, [4, 5, 1, 0]],
@@ -68,34 +68,12 @@ class Cube {
       [Cube.FACES.BACK, [6, 2, 3, 7]],
       [Cube.FACES.RIGHT, [7, 4, 0, 3]],
     ]).get(face);
-    const cornerPositionsToCycle =
+    const positionsToCycle =
       direction === DIRECTIONS.CLOCKWISE
-        ? cornerPositionsToCycleClockwise
-        : cornerPositionsToCycleClockwise.toReversed();
+        ? positionsToCycleClockwise
+        : positionsToCycleClockwise.toReversed();
 
-    const edgePositionsToCycleClockwise = new Map([
-      [Cube.FACES.TOP, [0, 1, 2, 3]],
-      [Cube.FACES.BOTTOM, [6, 5, 4, 7]],
-      [Cube.FACES.FRONT, [4, 9, 0, 8]],
-      [Cube.FACES.LEFT, [5, 10, 1, 9]],
-      [Cube.FACES.BACK, [6, 11, 2, 10]],
-      [Cube.FACES.RIGHT, [7, 8, 3, 11]],
-    ]).get(face);
-    const edgePositionsToCycle =
-      direction === DIRECTIONS.CLOCKWISE
-        ? edgePositionsToCycleClockwise
-        : edgePositionsToCycleClockwise.toReversed();
-
-    cycleArrayElementsAtIndices(this.corners, cornerPositionsToCycle);
-    cycleArrayElementsAtIndices(this.edges, edgePositionsToCycle);
-
-    // // Change parity for edges
-    // if (type === "edges") {
-    //   [positionA, positionB, positionC, positionD].forEach((position) => {
-    //     const pieceState = this.edges[position];
-    //     pieceState[1] = (pieceState[1] + 1) % 2; // Flip parity
-    //   });
-    // }
+    cycleArrayElementsAtIndices(this.corners, positionsToCycle);
 
     // // Change parity for corners
     // if (type === "corners" && !polar) {
@@ -108,66 +86,84 @@ class Cube {
     // }
   }
 
-  // Clockwise Turns
+  #faceTurnEdges(face, direction) {
+    const positionsToCycleClockwise = new Map([
+      [Cube.FACES.TOP, [0, 1, 2, 3]],
+      [Cube.FACES.BOTTOM, [6, 5, 4, 7]],
+      [Cube.FACES.FRONT, [4, 9, 0, 8]],
+      [Cube.FACES.LEFT, [5, 10, 1, 9]],
+      [Cube.FACES.BACK, [6, 11, 2, 10]],
+      [Cube.FACES.RIGHT, [7, 8, 3, 11]],
+    ]).get(face);
+    const positionsToCycle =
+      direction === DIRECTIONS.CLOCKWISE
+        ? positionsToCycleClockwise
+        : positionsToCycleClockwise.toReversed();
+
+    cycleArrayElementsAtIndices(this.edges, positionsToCycle);
+
+    // // Change parity for edges
+    // if (type === "edges") {
+    //   [positionA, positionB, positionC, positionD].forEach((position) => {
+    //     const pieceState = this.edges[position];
+    //     pieceState[1] = (pieceState[1] + 1) % 2; // Flip parity
+    //   });
+    // }
+  }
+
+  #faceTurn(face, direction) {
+    this.#faceTurnCorners(face, direction);
+    this.#faceTurnEdges(face, direction);
+  }
+
+  // Clockwise Turns in standard cubing notation
   turnU() {
-    // this.#fourCycle("edges", 1, 2, 3, 4);
-    // this.#fourCycle("corners", 1, 2, 3, 4, true);
+    this.#faceTurn(Cube.FACES.TOP, DIRECTIONS.CLOCKWISE);
   }
 
   turnD() {
-    // this.#fourCycle("edges", 9, 12, 11, 10);
-    // this.#fourCycle("corners", 5, 8, 7, 6, true);
-  }
-
-  turnR() {
-    // this.#fourCycle("edges", 2, 6, 10, 7);
-    // this.#fourCycle("corners", 3, 2, 6, 7);
+    this.#faceTurn(Cube.FACES.BOTTOM, DIRECTIONS.CLOCKWISE);
   }
 
   turnF() {
-    // this.#fourCycle("edges", 3, 7, 11, 8);
-    // this.#fourCycle("corners", 4, 3, 7, 8);
+    this.#faceTurn(Cube.FACES.FRONT, DIRECTIONS.CLOCKWISE);
   }
 
   turnL() {
-    // this.#fourCycle("edges", 4, 8, 12, 5);
-    // this.#fourCycle("corners", 1, 4, 8, 5);
+    this.#faceTurn(Cube.FACES.LEFT, DIRECTIONS.CLOCKWISE);
   }
 
   turnB() {
-    // this.#fourCycle("edges", 1, 5, 9, 6);
-    // this.#fourCycle("corners", 2, 1, 5, 6);
+    this.#faceTurn(Cube.FACES.BACK, DIRECTIONS.CLOCKWISE);
   }
 
-  // Anticlockwise (inverted) turns
+  turnR() {
+    this.#faceTurn(Cube.FACES.RIGHT, DIRECTIONS.CLOCKWISE);
+  }
+
+  // Anticlockwise (inverted) turns in standard cubing notation
   turnUi() {
-    // this.#fourCycle("edges", 1, 4, 3, 2);
-    // this.#fourCycle("corners", 1, 4, 3, 2, true);
+    this.#faceTurn(Cube.FACES.TOP, DIRECTIONS.ANTI_CLOCKWISE);
   }
 
   turnDi() {
-    // this.#fourCycle("edges", 9, 10, 11, 12);
-    // this.#fourCycle("corners", 5, 6, 7, 8, true);
-  }
-
-  turnRi() {
-    // this.#fourCycle("edges", 2, 7, 10, 6);
-    // this.#fourCycle("corners", 3, 7, 6, 2);
+    this.#faceTurn(Cube.FACES.BOTTOM, DIRECTIONS.ANTI_CLOCKWISE);
   }
 
   turnFi() {
-    // this.#fourCycle("edges", 3, 8, 11, 7);
-    // this.#fourCycle("corners", 4, 8, 7, 3);
+    this.#faceTurn(Cube.FACES.FRONT, DIRECTIONS.ANTI_CLOCKWISE);
   }
 
   turnLi() {
-    // this.#fourCycle("edges", 4, 5, 12, 8);
-    // this.#fourCycle("corners", 1, 5, 8, 4);
+    this.#faceTurn(Cube.FACES.LEFT, DIRECTIONS.ANTI_CLOCKWISE);
   }
 
   turnBi() {
-    // this.#fourCycle("edges", 1, 6, 9, 5);
-    // this.#fourCycle("corners", 2, 6, 5, 1);
+    this.#faceTurn(Cube.FACES.BACK, DIRECTIONS.ANTI_CLOCKWISE);
+  }
+
+  turnRi() {
+    this.#faceTurn(Cube.FACES.RIGHT, DIRECTIONS.ANTI_CLOCKWISE);
   }
 
   // General puzzle methods
