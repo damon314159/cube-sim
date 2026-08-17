@@ -1,6 +1,7 @@
 import { COLOURS } from "../constants/colour-scheme.js";
 import { DIRECTIONS } from "../constants/directions.js";
 import { cycleArrayElementsAtIndices } from "../utils/cycle-array-elements.js";
+import { shuffleArray } from "../utils/shuffle-array.js";
 import { Centre, Corner, Edge } from "./cubies.js";
 
 class Cube {
@@ -58,6 +59,9 @@ class Cube {
     ];
     this.centres = centreColours.map((colour) => new Centre({ colour }));
   }
+
+  // Methods to perform turns
+  // ---
 
   #faceTurnCorners(face, direction) {
     const positionsToCycleClockwise = new Map([
@@ -129,6 +133,8 @@ class Cube {
   }
 
   // Clockwise Turns in standard cubing notation
+  // ---
+
   turnU() {
     this.#faceTurn(Cube.FACES.TOP, DIRECTIONS.CLOCKWISE);
   }
@@ -154,6 +160,8 @@ class Cube {
   }
 
   // Anticlockwise (inverted) turns in standard cubing notation
+  // ---
+
   turnUi() {
     this.#faceTurn(Cube.FACES.TOP, DIRECTIONS.ANTI_CLOCKWISE);
   }
@@ -179,76 +187,69 @@ class Cube {
   }
 
   // General puzzle methods
+  // ---
+
   isSolved() {
     let solved = true;
-    // Check edges
-    Object.keys(this.edges).every((position) => {
-      const [cubie, orientation] = this.edges[position];
-      if (cubie !== parseInt(position, 10) || orientation !== 0) {
+
+    this.edges.forEach((edge, index) => {
+      if (
+        edge.startingPosition !== index ||
+        edge.orientation !== Edge.ORIENTATIONS.SOLVED
+      ) {
         solved = false;
-        return false;
       }
-      return true;
     });
 
-    // Check corners only if the edges were okay
-    if (solved) {
-      Object.keys(this.corners).every((position) => {
-        const [cubie, orientation] = this.corners[position];
-        if (cubie !== parseInt(position, 10) || orientation !== 0) {
-          solved = false;
-          return false;
-        }
-        return true;
-      });
-    }
+    this.corners.forEach((corner, index) => {
+      if (
+        corner.startingPosition !== index ||
+        corner.orientation !== Corner.ORIENTATIONS.SOLVED
+      ) {
+        solved = false;
+      }
+    });
 
     return solved;
   }
 
-  scramble() {
-    this.scrambleEdges();
-    this.scrambleCorners();
-  }
+  // The scramble logic from the original implementation needs fixing, it doesn't account for even/odd parity with respect to permutations
+  // ...
 
-  scrambleEdges() {
-    const positions = Object.keys(this.edges);
-    this.shuffleArray(positions);
-    for (let i = 0; i < positions.length - 1; i += 1) {
-      this.edges[positions[i]][1] = Math.floor(Math.random() * 2); // Random orientation
-    }
-    // Calculate the sum of the first 11 orientations modulo 2
-    const sumMod2 =
-      positions
-        .slice(0, -1)
-        .reduce((sum, position) => sum + this.edges[position][1], 0) % 2;
-    // Assign the calculated orientation to the last edge
-    this.edges[positions[positions.length - 1]][1] = sumMod2;
-  }
+  // scramble() {
+  //   this.scrambleEdges();
+  //   this.scrambleCorners();
+  // }
 
-  scrambleCorners() {
-    const positions = Object.keys(this.corners);
-    this.shuffleArray(positions);
-    for (let i = 0; i < positions.length - 1; i += 1) {
-      this.corners[positions[i]][1] = Math.floor(Math.random() * 3); // Random orientation
-    }
-    // Calculate the sum of the first 7 orientations modulo 23
-    const sumMod3 =
-      positions
-        .slice(0, -1)
-        .reduce((sum, position) => sum + this.edges[position][1], 0) % 3;
-    // Assign the calculated orientation to the last edge
-    this.corners[positions[positions.length - 1]][1] = (3 - sumMod3) % 3;
-  }
+  // scrambleEdges() {
+  //   const positions = Object.keys(this.edges);
+  //   shuffleArray(positions);
+  //   for (let i = 0; i < positions.length - 1; i += 1) {
+  //     this.edges[positions[i]][1] = Math.floor(Math.random() * 2); // Random orientation
+  //   }
+  //   // Calculate the sum of the first 11 orientations modulo 2
+  //   const sumMod2 =
+  //     positions
+  //       .slice(0, -1)
+  //       .reduce((sum, position) => sum + this.edges[position][1], 0) % 2;
+  //   // Assign the calculated orientation to the last edge
+  //   this.edges[positions[positions.length - 1]][1] = sumMod2;
+  // }
 
-  // Fisher-Yates shuffle
-  static shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i -= 1) {
-      const j = Math.floor(Math.random() * (i + 1));
-      // eslint-disable-next-line no-param-reassign
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-  }
+  // scrambleCorners() {
+  //   const positions = Object.keys(this.corners);
+  //   shuffleArray(positions);
+  //   for (let i = 0; i < positions.length - 1; i += 1) {
+  //     this.corners[positions[i]][1] = Math.floor(Math.random() * 3); // Random orientation
+  //   }
+  //   // Calculate the sum of the first 7 orientations modulo 23
+  //   const sumMod3 =
+  //     positions
+  //       .slice(0, -1)
+  //       .reduce((sum, position) => sum + this.edges[position][1], 0) % 3;
+  //   // Assign the calculated orientation to the last edge
+  //   this.corners[positions[positions.length - 1]][1] = (3 - sumMod3) % 3;
+  // }
 }
 
 export default Cube;
