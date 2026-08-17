@@ -1,5 +1,5 @@
 import './css/main.css'
-import './js/cube-render'
+import './scripts/render/cube'
 
 setTimeout(
   () =>

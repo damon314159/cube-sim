@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import Cube from './Cube'
+import Cube from '../model'
 
 const cube = new Cube()
 
