@@ -1,4 +1,6 @@
 import { COLOURS } from "../constants/colour-scheme.js";
+import { DIRECTIONS } from "../constants/directions.js";
+import { cycleArrayElementsAtIndices } from "../utils/cycle-array-elements.js";
 import { Centre, Corner, Edge } from "./cubies.js";
 
 class Cube {
@@ -6,8 +8,8 @@ class Cube {
     TOP: "top",
     BOTTOM: "bottom",
     FRONT: "front",
-    BACK: "back",
     LEFT: "left",
+    BACK: "back",
     RIGHT: "right",
   };
 
@@ -24,7 +26,7 @@ class Cube {
     ];
     this.corners = cornerColourTriples.map(
       ([colour1, colour2, colour3], index) =>
-        new Corner(colour1, colour2, colour3, index),
+        new Corner({ colour1, colour2, colour3, startingPosition: index }),
     );
 
     const edgeColourPairs = [
@@ -42,7 +44,8 @@ class Cube {
       [COLOURS.BACK, COLOURS.RIGHT],
     ];
     this.edges = edgeColourPairs.map(
-      ([colour1, colour2], index) => new Edge(colour1, colour2, index),
+      ([colour1, colour2], index) =>
+        new Edge({ colour1, colour2, startingPosition: index }),
     );
 
     const centreColours = [
@@ -53,29 +56,56 @@ class Cube {
       COLOURS.BACK,
       COLOURS.RIGHT,
     ];
-    this.centres = centreColours.map((colour) => new Centre(colour));
+    this.centres = centreColours.map((colour) => new Centre({ colour }));
   }
 
-  #faceTurn(face) {
-    const cornersToExchange = new Map();
+  #faceTurn(face, direction) {
+    const cornerPositionsToCycleClockwise = new Map([
+      [Cube.FACES.TOP, [0, 1, 2, 3]],
+      [Cube.FACES.BOTTOM, [7, 6, 5, 4]],
+      [Cube.FACES.FRONT, [4, 5, 1, 0]],
+      [Cube.FACES.LEFT, [5, 6, 2, 1]],
+      [Cube.FACES.BACK, [6, 2, 3, 7]],
+      [Cube.FACES.RIGHT, [7, 4, 0, 3]],
+    ]).get(face);
+    const cornerPositionsToCycle =
+      direction === DIRECTIONS.CLOCKWISE
+        ? cornerPositionsToCycleClockwise
+        : cornerPositionsToCycleClockwise.toReversed();
 
-    // Change parity for edges
-    if (type === "edges") {
-      [positionA, positionB, positionC, positionD].forEach((position) => {
-        const pieceState = this.edges[position];
-        pieceState[1] = (pieceState[1] + 1) % 2; // Flip parity
-      });
-    }
+    const edgePositionsToCycleClockwise = new Map([
+      [Cube.FACES.TOP, [0, 1, 2, 3]],
+      [Cube.FACES.BOTTOM, [6, 5, 4, 7]],
+      [Cube.FACES.FRONT, [4, 9, 0, 8]],
+      [Cube.FACES.LEFT, [5, 10, 1, 9]],
+      [Cube.FACES.BACK, [6, 11, 2, 10]],
+      [Cube.FACES.RIGHT, [7, 8, 3, 11]],
+    ]).get(face);
+    const edgePositionsToCycle =
+      direction === DIRECTIONS.CLOCKWISE
+        ? edgePositionsToCycleClockwise
+        : edgePositionsToCycleClockwise.toReversed();
 
-    // Change parity for corners
-    if (type === "corners" && !polar) {
-      [positionA, positionC].forEach((piece) => {
-        this.corners[piece][1] = (this.corners[piece][1] + 2) % 3;
-      });
-      [positionB, positionD].forEach((piece) => {
-        this.corners[piece][1] = (this.corners[piece][1] + 1) % 3;
-      });
-    }
+    cycleArrayElementsAtIndices(this.corners, cornerPositionsToCycle);
+    cycleArrayElementsAtIndices(this.edges, edgePositionsToCycle);
+
+    // // Change parity for edges
+    // if (type === "edges") {
+    //   [positionA, positionB, positionC, positionD].forEach((position) => {
+    //     const pieceState = this.edges[position];
+    //     pieceState[1] = (pieceState[1] + 1) % 2; // Flip parity
+    //   });
+    // }
+
+    // // Change parity for corners
+    // if (type === "corners" && !polar) {
+    //   [positionA, positionC].forEach((piece) => {
+    //     this.corners[piece][1] = (this.corners[piece][1] + 2) % 3;
+    //   });
+    //   [positionB, positionD].forEach((piece) => {
+    //     this.corners[piece][1] = (this.corners[piece][1] + 1) % 3;
+    //   });
+    // }
   }
 
   // Clockwise Turns

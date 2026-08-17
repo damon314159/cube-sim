@@ -5,7 +5,7 @@ export class Cubie {
 }
 
 export class Centre extends Cubie {
-  constructor(colour) {
+  constructor({ colour }) {
     super([colour]);
   }
 }
@@ -16,12 +16,12 @@ export class Edge extends Cubie {
     FLIPPED: "flipped",
   };
 
-  constructor(
+  constructor({
     colour1,
     colour2,
     startingPosition,
     orientation = Edge.ORIENTATIONS.SOLVED,
-  ) {
+  }) {
     super([colour1, colour2]);
     this.startingPosition = startingPosition; // for calculating parity
     this.orientation = orientation;
@@ -37,13 +37,13 @@ export class Corner extends Cubie {
   };
 
   // List colours clockwise around the vertex
-  constructor(
+  constructor({
     colour1,
     colour2,
     colour3,
     startingPosition,
     orientation = Corner.ORIENTATIONS.SOLVED,
-  ) {
+  }) {
     super([colour1, colour2, colour3]);
     this.startingPosition = startingPosition; // for calculating parity
     this.orientation = orientation;
