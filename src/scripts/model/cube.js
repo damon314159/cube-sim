@@ -1,5 +1,5 @@
-import { COLOURS } from "./colour-scheme";
-import { Centre, Corner } from "./cubies";
+import { COLOURS } from "./colour-scheme.js";
+import { Centre, Corner, Edge } from "./cubies.js";
 
 class Cube {
   constructor(size = 3) {

@@ -11,8 +11,14 @@ export class Centre extends Cubie {
 }
 
 export class Edge extends Cubie {
-  constructor(colour1, colour2) {
+  static ORIENTATIONS = {
+    SOLVED: "solved",
+    FLIPPED: "flipped",
+  };
+
+  constructor(colour1, colour2, orientation = Edge.ORIENTATIONS.SOLVED) {
     super([colour1, colour2]);
+    this.orientation = orientation;
   }
 }
 
