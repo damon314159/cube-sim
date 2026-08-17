@@ -17,6 +17,7 @@ export class Edge extends Cubie {
 }
 
 export class Corner extends Cubie {
+  // List colours clockwise around the vertex
   constructor(colour1, colour2, colour3) {
     super([colour1, colour2, colour3]);
   }
