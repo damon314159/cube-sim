@@ -1,6 +1,7 @@
 import { COLOURS } from "../constants/colour-scheme.js";
 import { DIRECTIONS } from "../constants/directions.js";
 import { cycleArrayElementsAtIndices } from "../utils/cycle-array-elements.js";
+import { randInt } from "../utils/rand.js";
 import { shuffleArray } from "../utils/shuffle-array.js";
 import { Centre, Corner, Edge } from "./cubies.js";
 
@@ -211,30 +212,7 @@ class Cube {
     return true;
   }
 
-  // The scramble logic from the original implementation needs fixing, it doesn't account for even/odd parity with respect to permutations
-  // ...
-
-  // scramble() {
-  //   this.scrambleEdges();
-  //   this.scrambleCorners();
-  // }
-
-  // scrambleEdges() {
-  //   const positions = Object.keys(this.edges);
-  //   shuffleArray(positions);
-  //   for (let i = 0; i < positions.length - 1; i += 1) {
-  //     this.edges[positions[i]][1] = Math.floor(Math.random() * 2); // Random orientation
-  //   }
-  //   // Calculate the sum of the first 11 orientations modulo 2
-  //   const sumMod2 =
-  //     positions
-  //       .slice(0, -1)
-  //       .reduce((sum, position) => sum + this.edges[position][1], 0) % 2;
-  //   // Assign the calculated orientation to the last edge
-  //   this.edges[positions[positions.length - 1]][1] = sumMod2;
-  // }
-
-  // scrambleCorners() {
+  // #scrambleCorners() {
   //   const positions = Object.keys(this.corners);
   //   shuffleArray(positions);
   //   for (let i = 0; i < positions.length - 1; i += 1) {
@@ -248,6 +226,48 @@ class Cube {
   //   // Assign the calculated orientation to the last edge
   //   this.corners[positions[positions.length - 1]][1] = (3 - sumMod3) % 3;
   // }
+
+  #scrambleCorners() {
+    this.corners = shuffleArray(this.corners);
+    let totalRotation = 0;
+    // Random orientation for first n-1 corners
+    for (let i = 0; i < this.corners.length - 1; i += 1) {
+      const rotationIncrements = randInt(0, 2);
+      totalRotation += rotationIncrements;
+      this.corners[i].rotate(rotationIncrements);
+    }
+    // Last corner has its orientation forced by modulo parity
+    if (totalRotation % 3 === 1) {
+      this.corners.at(-1).rotate(2);
+    }
+    if (totalRotation % 3 === 2) {
+      this.corners.at(-1).rotate(1);
+    }
+  }
+
+  #scrambleEdges() {
+    this.edges = shuffleArray(this.edges);
+    let numFlipped = 0;
+    // Random orientation for first n-1 edges
+    for (let i = 0; i < this.edges.length - 1; i += 1) {
+      if (randInt(0, 1) === 0) {
+        numFlipped += 1;
+        this.edges[i].flip();
+      }
+    }
+    // Last edge has its flip state forced by modulo parity
+    if (numFlipped % 2 === 1) {
+      this.edges.at(-1).flip();
+    }
+  }
+
+  #scrambleParityFix() {}
+
+  scramble() {
+    this.#scrambleCorners();
+    this.#scrambleEdges();
+    this.#scrambleParityFix();
+  }
 }
 
 export default Cube;
