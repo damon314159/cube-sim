@@ -2,7 +2,7 @@ import { COLOURS } from "../constants/colour-scheme.js";
 import { DIRECTIONS } from "../constants/directions.js";
 import { cycleArrayElementsAtIndices } from "../utils/cycle-array-elements.js";
 import { randInt } from "../utils/rand.js";
-import { shuffleArray } from "../utils/shuffle-array.js";
+import { inversions, shuffleArray } from "../utils/shuffle-array.js";
 import { Centre, Corner, Edge } from "./cubies.js";
 
 class Cube {
@@ -212,21 +212,6 @@ class Cube {
     return true;
   }
 
-  // #scrambleCorners() {
-  //   const positions = Object.keys(this.corners);
-  //   shuffleArray(positions);
-  //   for (let i = 0; i < positions.length - 1; i += 1) {
-  //     this.corners[positions[i]][1] = Math.floor(Math.random() * 3); // Random orientation
-  //   }
-  //   // Calculate the sum of the first 7 orientations modulo 23
-  //   const sumMod3 =
-  //     positions
-  //       .slice(0, -1)
-  //       .reduce((sum, position) => sum + this.edges[position][1], 0) % 3;
-  //   // Assign the calculated orientation to the last edge
-  //   this.corners[positions[positions.length - 1]][1] = (3 - sumMod3) % 3;
-  // }
-
   #scrambleCorners() {
     this.corners = shuffleArray(this.corners);
     let totalRotation = 0;
@@ -261,7 +246,21 @@ class Cube {
     }
   }
 
-  #scrambleParityFix() {}
+  #scrambleParityFix() {
+    const cornerStartingPositions = this.corners.map(
+      (corner) => corner.startingPosition,
+    );
+    const cornerParity = inversions(cornerStartingPositions) % 2;
+    const edgeStartingPositions = this.edges.map(
+      (edge) => edge.startingPosition,
+    );
+    const edgeParity = inversions(edgeStartingPositions) % 2;
+
+    // if the parities do not match, we swap two corners to fix it
+    if (cornerParity !== edgeParity) {
+      [this.corners[0], this.corners[1]] = [this.corners[1], this.corners[0]];
+    }
+  }
 
   scramble() {
     this.#scrambleCorners();
