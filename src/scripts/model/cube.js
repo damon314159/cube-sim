@@ -5,7 +5,7 @@ import { randInt } from "../utils/rand.js";
 import { inversions, shuffleArray } from "../utils/shuffle-array.js";
 import { Centre, Corner, Edge } from "./cubies.js";
 
-class Cube {
+export class Cube {
   static FACES = {
     TOP: "top",
     BOTTOM: "bottom",
@@ -268,5 +268,3 @@ class Cube {
     this.#scrambleParityFix();
   }
 }
-
-export default Cube;
