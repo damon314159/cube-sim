@@ -1,46 +1,47 @@
 import * as THREE from "three";
 import { Cube } from "../model/cube.js";
+import { convertDegreesToRadians } from "../utils/maths.js";
 
 const cube = new Cube();
 
-function toRadians(degrees) {
-  return degrees * (Math.PI / 180);
-}
+const SCENE_FOV = 75;
+const SCENE_PLANE_DISTANCES = {
+  NEAR: 0.1,
+  FAR: 1000,
+};
+const STARTING_Z_POSITION = 5;
+const CUBE_INTERNAL_COLOUR = 0x000000;
+const CUBIE_WIREFRAME_WIDTH = 2;
 
-// Create a scene
 const scene = new THREE.Scene();
-// Create a camera
 const camera = new THREE.PerspectiveCamera(
-  75,
+  SCENE_FOV,
   window.innerWidth / window.innerHeight,
-  0.1,
-  1000,
+  SCENE_PLANE_DISTANCES.NEAR,
+  SCENE_PLANE_DISTANCES.FAR,
 );
-camera.position.z = 5;
-// Create a renderer
+camera.position.z = STARTING_Z_POSITION;
+
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
-// Create a group to hold all cubies
+
 const cubeGroup = new THREE.Group();
 scene.add(cubeGroup);
 
-// Function to create a wireframe around a cubie
 function createCubieWireframe(cubie) {
   const edges = new THREE.EdgesGeometry(cubie.geometry);
   const wireframeMaterial = new THREE.LineBasicMaterial({
-    color: 0x000000,
-    linewidth: 2,
+    color: CUBE_INTERNAL_COLOUR,
+    linewidth: CUBIE_WIREFRAME_WIDTH,
   });
-
   const wireframe = new THREE.LineSegments(edges, wireframeMaterial);
   cubie.add(wireframe);
 }
 
-// Function to create a cubie geometry based on its position
 function createCubieGeometry(x, y, z, cubieSize) {
   const materials = [
-    new THREE.MeshBasicMaterial({ color: 0x000000 }), // Internals - Black
+    new THREE.MeshBasicMaterial({ color: CUBE_INTERNAL_COLOUR }), // Internals - Black
     new THREE.MeshBasicMaterial({ color: 0x017eff }), // Right - Blue
     new THREE.MeshBasicMaterial({ color: 0x00e202 }), // Left - Green
     new THREE.MeshBasicMaterial({ color: 0xffffff }), // Up - White
@@ -69,6 +70,7 @@ function createCubieGeometry(x, y, z, cubieSize) {
         material.color.b !== 0
       ) {
         // Name clickable cubies' material for click handling purposes
+        // eslint-disable-next-line no-param-reassign
         material.name = "centerCubie";
       }
     });
@@ -139,8 +141,8 @@ document.addEventListener("mousemove", (event) => {
   // Rotate the entire group
   const deltaRotationQuaternion = new THREE.Quaternion().setFromEuler(
     new THREE.Euler(
-      toRadians(deltaMove.y * 1),
-      toRadians(deltaMove.x * 1),
+      convertDegreesToRadians(deltaMove.y * 1),
+      convertDegreesToRadians(deltaMove.x * 1),
       0,
       "XYZ",
     ),
