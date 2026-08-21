@@ -40,9 +40,9 @@ export class Cube {
       [COLOURS.BOTTOM, COLOURS.LEFT],
       [COLOURS.BOTTOM, COLOURS.BACK],
       [COLOURS.BOTTOM, COLOURS.RIGHT],
-      [COLOURS.RIGHT, COLOURS.FRONT],
+      [COLOURS.FRONT, COLOURS.RIGHT],
       [COLOURS.FRONT, COLOURS.LEFT],
-      [COLOURS.LEFT, COLOURS.BACK],
+      [COLOURS.BACK, COLOURS.LEFT],
       [COLOURS.BACK, COLOURS.RIGHT],
     ];
     this.edges = edgeColourPairs.map(
@@ -113,12 +113,12 @@ export class Cube {
 
     // edges naturally flip as turns are made, we need to update their orientations
     const shouldFlipPerPosition = new Map([
-      [Cube.FACES.TOP, [true, true, true, true]], // todo: figure out what these should actually be set to. brain too fried rn
-      [Cube.FACES.BOTTOM, [true, true, true, true]], // todo: as above
-      [Cube.FACES.FRONT, [true, true, true, true]], // todo: as above
-      [Cube.FACES.LEFT, [true, true, true, true]], // todo: as above
-      [Cube.FACES.BACK, [true, true, true, true]], // todo: as above
-      [Cube.FACES.RIGHT, [true, true, true, true]], // todo: as above
+      [Cube.FACES.TOP, [false, false, false, false]],
+      [Cube.FACES.BOTTOM, [false, false, false, false]],
+      [Cube.FACES.FRONT, [true, true, true, true]],
+      [Cube.FACES.LEFT, [false, false, false, false]],
+      [Cube.FACES.BACK, [true, true, true, true]],
+      [Cube.FACES.RIGHT, [false, false, false, false]],
     ]).get(face);
     shouldFlipPerPosition.forEach((shouldFlip, index) => {
       const edge = this.edges[positionsToCycle[index]];
