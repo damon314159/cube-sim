@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { COLOURS } from "../constants/colour-scheme.js";
 import { Cube } from "../model/cube.js";
 import { convertDegreesToRadians } from "../utils/maths.js";
 
@@ -10,8 +11,8 @@ const SCENE_PLANE_DISTANCES = {
   FAR: 1000,
 };
 const STARTING_Z_POSITION = 5;
-const CUBE_INTERNAL_COLOUR = 0x000000;
 const CUBIE_WIREFRAME_WIDTH = 2;
+const CUBIE_SIZE = 1;
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -32,23 +33,29 @@ scene.add(cubeGroup);
 function createCubieWireframe(cubie) {
   const edges = new THREE.EdgesGeometry(cubie.geometry);
   const wireframeMaterial = new THREE.LineBasicMaterial({
-    color: CUBE_INTERNAL_COLOUR,
+    color: COLOURS.INTERNAL,
     linewidth: CUBIE_WIREFRAME_WIDTH,
   });
   const wireframe = new THREE.LineSegments(edges, wireframeMaterial);
   cubie.add(wireframe);
 }
 
-function createCubieGeometry(x, y, z, cubieSize) {
-  const materials = [
-    new THREE.MeshBasicMaterial({ color: CUBE_INTERNAL_COLOUR }), // Internals - Black
-    new THREE.MeshBasicMaterial({ color: 0x017eff }), // Right - Blue
-    new THREE.MeshBasicMaterial({ color: 0x00e202 }), // Left - Green
-    new THREE.MeshBasicMaterial({ color: 0xffffff }), // Up - White
-    new THREE.MeshBasicMaterial({ color: 0xf6ff00 }), // Down - Yellow
-    new THREE.MeshBasicMaterial({ color: 0xdd0000 }), // Front - Red
-    new THREE.MeshBasicMaterial({ color: 0xff8b1a }), // Back - Orange
-  ];
+/**
+ *
+ * @param {Cubie} cubie - the cubie to create geometry for
+ * @param {Object} relativeCoords - from (0,0,0) to (2,2,2) describing which cubie this is
+ */
+function createCubieGeometry(cubie, relativeCoords) {
+  const { x, y, z } = relativeCoords;
+  const materials = {
+    internal: new THREE.MeshBasicMaterial({ color: COLOURS.INTERNAL }),
+    top: new THREE.MeshBasicMaterial({ color: COLOURS.TOP }),
+    bottom: new THREE.MeshBasicMaterial({ color: COLOURS.BOTTOM }),
+    front: new THREE.MeshBasicMaterial({ color: COLOURS.FRONT }),
+    back: new THREE.MeshBasicMaterial({ color: COLOURS.BACK }),
+    left: new THREE.MeshBasicMaterial({ color: COLOURS.LEFT }),
+    right: new THREE.MeshBasicMaterial({ color: COLOURS.RIGHT }),
+  };
   // Decide which faces are internal and thus should be coloured black
   const cubieMaterials = [
     x > 0 ? materials[1] : materials[0],
@@ -76,17 +83,20 @@ function createCubieGeometry(x, y, z, cubieSize) {
     });
   }
 
-  const cubieGeometry = new THREE.BoxGeometry(cubieSize, cubieSize, cubieSize);
+  const cubieGeometry = new THREE.BoxGeometry(
+    CUBIE_SIZE,
+    CUBIE_SIZE,
+    CUBIE_SIZE,
+  );
   return new THREE.Mesh(cubieGeometry, cubieMaterials);
 }
 
 // Create and position the cubies
-const cubieSize = 1;
 for (let x = 0; x < 3; x += 1) {
   for (let y = 0; y < 3; y += 1) {
     for (let z = 0; z < 3; z += 1) {
       // Create a cubie
-      const cubie = createCubieGeometry(x - 1, y - 1, z - 1, cubieSize);
+      const cubie = createCubieGeometry(x - 1, y - 1, z - 1);
       createCubieWireframe(cubie);
       // Position the cubie
       cubie.position.set(
