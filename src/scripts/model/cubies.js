@@ -89,3 +89,9 @@ export class Corner extends Cubie {
     return [this.stickers[0], this.stickers[1], this.stickers[2]];
   }
 }
+
+export const CUBIE_TYPES = {
+  CORNER: "corner",
+  EDGE: "edge",
+  CENTRE: "centre",
+};

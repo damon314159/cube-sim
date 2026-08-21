@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { COLOURS } from "../constants/colour-scheme.js";
 import { Cube } from "../model/cube.js";
+import { CUBIE_TYPES } from "../model/cubies.js";
 import { convertDegreesToRadians } from "../utils/maths.js";
 
 const cube = new Cube();
@@ -45,7 +46,7 @@ function createCubieWireframe(cubie) {
  * @param {Cubie} cubie - the cubie to create geometry for
  * @param {Object} relativeCoords - from (0,0,0) to (2,2,2) describing which cubie this is
  */
-function createCubieGeometry(cubie, relativeCoords) {
+function createCubieGeometry(cubie, cubieType, relativeCoords) {
   const internalMaterial = new THREE.MeshBasicMaterial({
     color: COLOURS.INTERNAL,
   });
@@ -142,14 +143,14 @@ function createCubieGeometry(cubie, relativeCoords) {
     return materials;
   };
 
-  const getCenterMaterials = (cubie, relativeCoords) => {
+  const getCentreMaterials = (cubie, relativeCoords) => {
     const { x, y, z } = relativeCoords;
     const [sticker] = cubie.getStickers();
     const materials = getBlankMaterials();
     const centreMaterial = getMaterial(sticker);
     // name clickable cubies' material for click handling purposes
-    centreMaterial.name = "centerCubie";
-    // there is only one sticker, and only one face not on the center of its axis
+    centreMaterial.name = "centreCubie";
+    // there is only one sticker, and only one face not on the centre of its axis
     if (x === 2) {
       materials.right = centreMaterial;
     } else if (x === 0) {
@@ -166,14 +167,34 @@ function createCubieGeometry(cubie, relativeCoords) {
     return materials;
   };
 
+  const cubieMaterials = (() => {
+    if (cubieType === CUBIE_TYPES.CORNER) {
+      return getCornerMaterials(cubie, relativeCoords);
+    }
+    if (cubieType === CUBIE_TYPES.EDGE) {
+      return getEdgeMaterials(cubie, relativeCoords);
+    }
+    return getCentreMaterials(cubie, relativeCoords);
+  })();
+
   const cubieGeometry = new THREE.BoxGeometry(
     CUBIE_SIZE,
     CUBIE_SIZE,
     CUBIE_SIZE,
   );
-  // in Three.js a cube geometry's materials are encoded in an array representing right, left, top, bottom, back, front
-  return new THREE.Mesh(cubieGeometry, cubieMaterials);
+  return new THREE.Mesh(cubieGeometry, [
+    cubieMaterials.right,
+    cubieMaterials.left,
+    cubieMaterials.top,
+    cubieMaterials.bottom,
+    cubieMaterials.back,
+    cubieMaterials.front,
+  ]);
 }
+
+// -----
+// TODO -- rest of this file from here down hasn't been worked through yet
+// -----
 
 // Create and position the cubies
 for (let x = 0; x < 3; x += 1) {
@@ -355,17 +376,17 @@ function onMouseClick(event) {
   for (let i = 0; i < intersects.length; i += 1) {
     // Find the first raycast intersection that is a face
     if (intersects[i].face) {
-      // Test that cubie for being a center cubie
-      let isCenter = false;
+      // Test that cubie for being a centre cubie
+      let isCentre = false;
       intersects[i].object.material.some((material) => {
-        if (material.name === "centerCubie") {
-          isCenter = true;
+        if (material.name === "centreCubie") {
+          isCentre = true;
           return true; // Breaks out of the some loop
         }
         return false;
       });
-      // If it was a center cubie, determine which, and perform the turn
-      if (isCenter) {
+      // If it was a centre cubie, determine which, and perform the turn
+      if (isCentre) {
         let face;
         const [x, y, z] = Object.values(intersects[i].normal);
         if (x === 1) face = "r";
@@ -392,7 +413,11 @@ document.addEventListener("keydown", (event) => {
 });
 
 // Initial rotation to show front, right, and top faces
-cubeGroup.rotation.set(toRadians(30), toRadians(-35), 0);
+cubeGroup.rotation.set(
+  convertDegreesToRadians(30),
+  convertDegreesToRadians(-35),
+  0,
+);
 // Create an animation loop
 function animate() {
   requestAnimationFrame(animate);
