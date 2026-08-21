@@ -46,48 +46,132 @@ function createCubieWireframe(cubie) {
  * @param {Object} relativeCoords - from (0,0,0) to (2,2,2) describing which cubie this is
  */
 function createCubieGeometry(cubie, relativeCoords) {
-  const { x, y, z } = relativeCoords;
-  const materials = {
-    internal: new THREE.MeshBasicMaterial({ color: COLOURS.INTERNAL }),
-    top: new THREE.MeshBasicMaterial({ color: COLOURS.TOP }),
-    bottom: new THREE.MeshBasicMaterial({ color: COLOURS.BOTTOM }),
-    front: new THREE.MeshBasicMaterial({ color: COLOURS.FRONT }),
-    back: new THREE.MeshBasicMaterial({ color: COLOURS.BACK }),
-    left: new THREE.MeshBasicMaterial({ color: COLOURS.LEFT }),
-    right: new THREE.MeshBasicMaterial({ color: COLOURS.RIGHT }),
-  };
-  // Decide which faces are internal and thus should be coloured black
-  const cubieMaterials = [
-    x > 0 ? materials[1] : materials[0],
-    x < 0 ? materials[2] : materials[0],
-    y > 0 ? materials[3] : materials[0],
-    y < 0 ? materials[4] : materials[0],
-    z > 0 ? materials[5] : materials[0],
-    z < 0 ? materials[6] : materials[0],
-  ];
+  const internalMaterial = new THREE.MeshBasicMaterial({
+    color: COLOURS.INTERNAL,
+  });
+  const getBlankMaterials = () => ({
+    right: internalMaterial,
+    left: internalMaterial,
+    top: internalMaterial,
+    bottom: internalMaterial,
+    back: internalMaterial,
+    front: internalMaterial,
+  });
+  const getMaterial = (colour) =>
+    new THREE.MeshBasicMaterial({ color: colour });
 
-  // Cubies in the center of a given face have zeroes in exactly two coordinates
-  const isCenter = (x === 0) + (y === 0) + (z === 0) === 2;
-  if (isCenter) {
-    cubieMaterials.forEach((material) => {
-      // If a face of a center cubie is non-black, it is the clickable coloured face
-      if (
-        material.color.r !== 0 ||
-        material.color.g !== 0 ||
-        material.color.b !== 0
-      ) {
-        // Name clickable cubies' material for click handling purposes
-        // eslint-disable-next-line no-param-reassign
-        material.name = "centerCubie";
-      }
-    });
-  }
+  const getCornerMaterials = (cubie, relativeCoords) => {
+    const { x, y, z } = relativeCoords;
+    const stickers = cubie.getOrientedStickers();
+    const materials = getBlankMaterials();
+    // stickers are labelled clockwise, which means unfortunately you need to just list all 8 cases
+    const coordsString = `${x},${y},${z}`;
+    switch (coordsString) {
+      case "0,0,0":
+        materials.bottom = getMaterial(stickers[0]);
+        materials.left = getMaterial(stickers[1]);
+        materials.front = getMaterial(stickers[2]);
+        break;
+      case "0,0,2":
+        materials.bottom = getMaterial(stickers[0]);
+        materials.back = getMaterial(stickers[1]);
+        materials.left = getMaterial(stickers[2]);
+        break;
+      case "0,2,0":
+        materials.top = getMaterial(stickers[0]);
+        materials.front = getMaterial(stickers[1]);
+        materials.left = getMaterial(stickers[2]);
+        break;
+      case "0,2,2":
+        materials.top = getMaterial(stickers[0]);
+        materials.left = getMaterial(stickers[1]);
+        materials.back = getMaterial(stickers[2]);
+        break;
+      case "2,0,0":
+        materials.bottom = getMaterial(stickers[0]);
+        materials.front = getMaterial(stickers[1]);
+        materials.right = getMaterial(stickers[2]);
+        break;
+      case "2,0,2":
+        materials.bottom = getMaterial(stickers[0]);
+        materials.right = getMaterial(stickers[1]);
+        materials.back = getMaterial(stickers[2]);
+        break;
+      case "2,2,0":
+        materials.top = getMaterial(stickers[0]);
+        materials.right = getMaterial(stickers[1]);
+        materials.front = getMaterial(stickers[2]);
+        break;
+      case "2,2,2":
+        materials.top = getMaterial(stickers[0]);
+        materials.back = getMaterial(stickers[1]);
+        materials.right = getMaterial(stickers[2]);
+        break;
+      default:
+        throw new Error(
+          `Unknown corner cubie relativeCoords: ${relativeCoords}`,
+        );
+    }
+    return materials;
+  };
+
+  const getEdgeMaterials = (cubie, relativeCoords) => {
+    const { x, y, z } = relativeCoords;
+    const stickers = cubie.getOrientedStickers();
+    const materials = getBlankMaterials();
+    // determine "primary" sticker location. top/bottom have priority, then front/back
+    if (y === 2) {
+      materials.top = getMaterial(stickers[0]);
+    } else if (y === 0) {
+      materials.bottom = getMaterial(stickers[0]);
+    } else if (z === 2) {
+      materials.back = getMaterial(stickers[0]);
+    } else {
+      materials.front = getMaterial(stickers[0]);
+    }
+    // determine "secondary" sticker location. left/right have lowest priority, then front/back
+    if (x === 2) {
+      materials.right = getMaterial(stickers[1]);
+    } else if (x === 0) {
+      materials.left = getMaterial(stickers[1]);
+    } else if (z === 2) {
+      materials.back = getMaterial(stickers[1]);
+    } else {
+      materials.front = getMaterial(stickers[1]);
+    }
+    return materials;
+  };
+
+  const getCenterMaterials = (cubie, relativeCoords) => {
+    const { x, y, z } = relativeCoords;
+    const [sticker] = cubie.getStickers();
+    const materials = getBlankMaterials();
+    const centreMaterial = getMaterial(sticker);
+    // name clickable cubies' material for click handling purposes
+    centreMaterial.name = "centerCubie";
+    // there is only one sticker, and only one face not on the center of its axis
+    if (x === 2) {
+      materials.right = centreMaterial;
+    } else if (x === 0) {
+      materials.left = centreMaterial;
+    } else if (y === 2) {
+      materials.top = centreMaterial;
+    } else if (y === 0) {
+      materials.bottom = centreMaterial;
+    } else if (z === 2) {
+      materials.back = centreMaterial;
+    } else {
+      materials.front = centreMaterial;
+    }
+    return materials;
+  };
 
   const cubieGeometry = new THREE.BoxGeometry(
     CUBIE_SIZE,
     CUBIE_SIZE,
     CUBIE_SIZE,
   );
+  // in Three.js a cube geometry's materials are encoded in an array representing right, left, top, bottom, back, front
   return new THREE.Mesh(cubieGeometry, cubieMaterials);
 }
 

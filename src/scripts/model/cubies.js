@@ -2,6 +2,10 @@ export class Cubie {
   constructor(stickers) {
     this.stickers = stickers;
   }
+
+  getStickers() {
+    return this.stickers;
+  }
 }
 
 export class Centre extends Cubie {
@@ -32,6 +36,13 @@ export class Edge extends Cubie {
       this.orientation === Edge.ORIENTATIONS.SOLVED
         ? Edge.ORIENTATIONS.FLIPPED
         : Edge.ORIENTATIONS.SOLVED;
+  }
+
+  getOrientedStickers() {
+    if (this.orientation === Edge.ORIENTATIONS.FLIPPED) {
+      return [this.stickers[1], this.stickers[0]];
+    }
+    return [this.stickers[0], this.stickers[1]];
   }
 }
 
@@ -66,5 +77,15 @@ export class Corner extends Cubie {
     const newIndex = (currentIndex + increments) % 3;
     const newOrientation = orderedOrientations[newIndex];
     this.orientation = newOrientation;
+  }
+
+  getOrientedStickers() {
+    if (this.orientation === Corner.ORIENTATIONS.CLOCKWISE) {
+      return [this.stickers[2], this.stickers[0], this.stickers[1]];
+    }
+    if (this.orientation === Corner.ORIENTATIONS.ANTI_CLOCKWISE) {
+      return [this.stickers[1], this.stickers[2], this.stickers[0]];
+    }
+    return [this.stickers[0], this.stickers[1], this.stickers[2]];
   }
 }
