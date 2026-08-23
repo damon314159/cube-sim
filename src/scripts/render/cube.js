@@ -129,7 +129,7 @@ document.addEventListener("mousemove", (event) => {
 });
 
 // handle turns
-function rotateFace(face, direction = DIRECTIONS.CLOCKWISE) {
+function rotateFace(face, direction) {
   const tempSubGroup = new THREE.Group();
   const rotationAmount =
     ((direction === DIRECTIONS.CLOCKWISE ? 1 : -1) * Math.PI) / 2;
@@ -207,17 +207,15 @@ function rotateFace(face, direction = DIRECTIONS.CLOCKWISE) {
   }
 }
 
-// -----
-// TODO -- rest of this file from here down hasn't been worked through yet
-// -----
-
 // Handle clicks for face turns
 function onMouseClick(event) {
-  // Filter out non-left clicks
   if (event.button !== 0) {
-    return;
+    return; // left click only
   }
   const isShiftHeld = event.shiftKey;
+  const direction = isShiftHeld
+    ? DIRECTIONS.ANTI_CLOCKWISE
+    : DIRECTIONS.CLOCKWISE;
 
   // Calculate mouse coordinates
   const mouse = new THREE.Vector2();
@@ -232,29 +230,46 @@ function onMouseClick(event) {
   for (let i = 0; i < intersects.length; i += 1) {
     // Find the first raycast intersection that is a face
     if (intersects[i].face) {
-      // Test that cubie for being a centre cubie
-      let isCentre = false;
-      intersects[i].object.material.some((material) => {
-        if (material.name === "centreCubie") {
-          isCentre = true;
-          return true; // Breaks out of the some loop
-        }
-        return false;
-      });
-      // If it was a centre cubie, determine which, and perform the turn
+      const isCentre = intersects[i].object.material.some(
+        (material) => material.name === "centreCubie",
+      );
       if (isCentre) {
         let face;
         const [x, y, z] = Object.values(intersects[i].normal);
-        if (x === 1) face = "r";
-        if (x === -1) face = "l";
-        if (y === 1) face = "u";
-        if (y === -1) face = "d";
-        if (z === 1) face = "f";
-        if (z === -1) face = "b";
-        rotateFace(face, isShiftHeld ? "i" : "c");
-        cube[`turn${face.toUpperCase()}${isShiftHeld ? "i" : ""}`]();
+        if (x === 2) face = Cube.FACES.RIGHT;
+        if (x === 0) face = Cube.FACES.LEFT;
+        if (y === 2) face = Cube.FACES.TOP;
+        if (y === 0) face = Cube.FACES.BOTTOM;
+        if (z === 2) face = Cube.FACES.BACK;
+        if (z === 0) face = Cube.FACES.FRONT;
+        rotateFace(face, direction);
+
+        const cubeNotationFaceLetter = (() => {
+          switch (face) {
+            case Cube.FACES.RIGHT:
+              return "R";
+            case Cube.FACES.LEFT:
+              return "L";
+            case Cube.FACES.TOP:
+              return "U";
+            case Cube.FACES.BOTTOM:
+              return "D";
+            case Cube.FACES.BACK:
+              return "B";
+            case Cube.FACES.FRONT:
+              return "F";
+            default:
+              throw new Error(
+                `Unknown face in face enum to cube notation map: ${face}`,
+              );
+          }
+        })();
+        const cubeNotationDirectionLetter =
+          direction === DIRECTIONS.CLOCKWISE ? "" : "i";
+        const cubeTurnMethodName = `turn${cubeNotationFaceLetter}${cubeNotationDirectionLetter}`;
+        cube[cubeTurnMethodName]();
       }
-      // Stop checking the ray here since any other intersections are background
+      // stop checking the ray here since any other intersections are background
       break;
     }
   }
@@ -268,13 +283,13 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-// Initial rotation to show front, right, and top faces
+// initial rotation to show front, right, and top faces
 cubeGroup.rotation.set(
   convertDegreesToRadians(30),
   convertDegreesToRadians(-35),
   0,
 );
-// Create an animation loop
+
 function animate() {
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
