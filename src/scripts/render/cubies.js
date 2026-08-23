@@ -119,17 +119,30 @@ const getCentreMaterials = (cubie, relativeCoords) => {
   return materials;
 };
 
+function getCubieType(relativeCoords) {
+  const { x, y, z } = relativeCoords;
+  const centredAxes = [x, y, z].filter((coord) => coord === 1).length;
+  if (centredAxes === 0) {
+    return CUBIE_TYPES.CORNER;
+  }
+  if (centredAxes === 1) {
+    return CUBIE_TYPES.EDGE;
+  }
+  if (centredAxes === 2) {
+    return CUBIE_TYPES.CENTRE;
+  }
+  return null; // core of the puzzle, not a cubie
+}
+
 /**
  *
  * @param {Cubie} cubie - the cubie to create geometry for
  * @param {Object} relativeCoords - from (0,0,0) to (2,2,2) describing which cubie this is
  */
-export function createCubieGeometry(
-  cubie,
-  cubieType,
-  relativeCoords,
-  cubieSize,
-) {
+export function createCubieGeometry(cubie, relativeCoords, cubieSize) {
+  const cubieType = getCubieType(relativeCoords);
+  if (!cubieType) return null;
+
   const cubieMaterials = (() => {
     if (cubieType === CUBIE_TYPES.CORNER) {
       return getCornerMaterials(cubie, relativeCoords);

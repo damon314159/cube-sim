@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { COLOURS } from "../constants/colour-scheme.js";
 import { Cube } from "../model/cube.js";
-import { CUBIE_TYPES } from "../model/cubies.js";
 import { convertDegreesToRadians } from "../utils/maths.js";
 import { createCubieGeometry } from "./cubies.js";
 
@@ -52,8 +51,7 @@ for (let x = 0; x < 3; x += 1) {
     for (let z = 0; z < 3; z += 1) {
       // Create a cubie
       const cubie = createCubieGeometry(
-        cubie,
-        cubieType,
+        cubieModel,
         { x: 0, y: 0, z: 0 },
         CUBIE_SIZE,
       );
