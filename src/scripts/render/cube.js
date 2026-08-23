@@ -235,7 +235,7 @@ function onMouseClick(event) {
       );
       if (isCentre) {
         let face;
-        const [x, y, z] = Object.values(intersects[i].normal);
+        const [x, y, z] = Object.values(intersects[i].object.position);
         if (x === 2) face = Cube.FACES.RIGHT;
         if (x === 0) face = Cube.FACES.LEFT;
         if (y === 2) face = Cube.FACES.TOP;
