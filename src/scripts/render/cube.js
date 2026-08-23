@@ -1,8 +1,7 @@
 import * as THREE from "three";
-import { COLOURS } from "../constants/colour-scheme.js";
 import { Cube } from "../model/cube.js";
 import { convertDegreesToRadians } from "../utils/maths.js";
-import { createCubieGeometry } from "./cubies.js";
+import { createCubieGeometry, createCubieWireframe } from "./cubies.js";
 
 const cube = new Cube();
 
@@ -31,16 +30,6 @@ document.body.appendChild(renderer.domElement);
 const cubeGroup = new THREE.Group();
 scene.add(cubeGroup);
 
-function createCubieWireframe(cubie) {
-  const edges = new THREE.EdgesGeometry(cubie.geometry);
-  const wireframeMaterial = new THREE.LineBasicMaterial({
-    color: COLOURS.INTERNAL,
-    linewidth: CUBIE_WIREFRAME_WIDTH,
-  });
-  const wireframe = new THREE.LineSegments(edges, wireframeMaterial);
-  cubie.add(wireframe);
-}
-
 // -----
 // TODO -- rest of this file from here down hasn't been worked through yet
 // -----
@@ -49,13 +38,12 @@ function createCubieWireframe(cubie) {
 for (let x = 0; x < 3; x += 1) {
   for (let y = 0; y < 3; y += 1) {
     for (let z = 0; z < 3; z += 1) {
-      // Create a cubie
       const cubie = createCubieGeometry(
         cubieModel,
         { x: 0, y: 0, z: 0 },
         CUBIE_SIZE,
       );
-      createCubieWireframe(cubie);
+      createCubieWireframe(cubie, CUBIE_WIREFRAME_WIDTH);
       // Position the cubie
       cubie.position.set(
         (x - 1) * cubieSize,

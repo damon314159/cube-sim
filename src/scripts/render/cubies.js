@@ -5,6 +5,7 @@ import { CUBIE_TYPES } from "../model/cubies.js";
 const internalMaterial = new THREE.MeshBasicMaterial({
   color: COLOURS.INTERNAL,
 });
+
 const getBlankMaterials = () => ({
   right: internalMaterial,
   left: internalMaterial,
@@ -136,7 +137,7 @@ function getCubieType(relativeCoords) {
 
 /**
  *
- * @param {Cubie} cubie - the cubie to create geometry for
+ * @param {Cubie} cubie - the cubie model to create geometry for
  * @param {Object} relativeCoords - from (0,0,0) to (2,2,2) describing which cubie this is
  */
 export function createCubieGeometry(cubie, relativeCoords, cubieSize) {
@@ -162,4 +163,19 @@ export function createCubieGeometry(cubie, relativeCoords, cubieSize) {
     cubieMaterials.back,
     cubieMaterials.front,
   ]);
+}
+
+/**
+ *
+ * @param {THREE.BoxGeometry} cubie - the cubie geometry to create a wireframe for
+ * @param {number} wireframeWidth - the line width for the wireframe
+ */
+export function createCubieWireframe(cubie, wireframeWidth) {
+  const edges = new THREE.EdgesGeometry(cubie.geometry);
+  const wireframeMaterial = new THREE.LineBasicMaterial({
+    color: COLOURS.INTERNAL,
+    linewidth: wireframeWidth,
+  });
+  const wireframe = new THREE.LineSegments(edges, wireframeMaterial);
+  cubie.add(wireframe);
 }
