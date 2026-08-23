@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { DIRECTIONS } from "../constants/directions.js";
 import { Cube } from "../model/cube.js";
 import { CUBIE_TYPES } from "../model/cubies.js";
 import { convertDegreesToRadians } from "../utils/maths.js";
@@ -60,6 +61,7 @@ for (let x = 0; x < 3; x += 1) {
 
       const cubie = createCubieGeometry(cubieModel, { x, y, z }, CUBIE_SIZE);
       createCubieWireframe(cubie, CUBIE_WIREFRAME_WIDTH);
+      // TODO: previously the cubies were all centred on 0,0,0. Need to ensure that everything works now the centre is at 1,1,1 instead
       cubie.position.set(x * CUBIE_SIZE, y * CUBIE_SIZE, z * CUBIE_SIZE);
       cubeGroup.add(cubie);
 
@@ -68,11 +70,6 @@ for (let x = 0; x < 3; x += 1) {
   }
 }
 
-// -----
-// TODO -- rest of this file from here down hasn't been worked through yet
-// -----
-
-// Handle window resizing
 window.addEventListener("resize", () => {
   const newWidth = window.innerWidth;
   const newHeight = window.innerHeight;
@@ -82,15 +79,16 @@ window.addEventListener("resize", () => {
 });
 
 // Suppress standard right click menu
+// TODO: make right click clockwise and left click anticlockwise
 document.addEventListener("contextmenu", (event) => {
   event.preventDefault();
 });
 
-// Handle mouse dragging
+// Handle right click + drag for cube rotations
 let isDragging = false;
 let previousMousePosition = { x: 0, y: 0 };
 document.addEventListener("mousedown", (event) => {
-  if (event.button !== 2) return; // Only proceed for right mouse button
+  if (event.button !== 2) return; // right mouse button only
   isDragging = true;
   previousMousePosition = {
     x: event.clientX,
@@ -111,7 +109,6 @@ document.addEventListener("mousemove", (event) => {
     y: event.clientY - previousMousePosition.y,
   };
 
-  // Rotate the entire group
   const deltaRotationQuaternion = new THREE.Quaternion().setFromEuler(
     new THREE.Euler(
       convertDegreesToRadians(deltaMove.y * 1),
@@ -122,42 +119,40 @@ document.addEventListener("mousemove", (event) => {
   );
   cubeGroup.quaternion.multiplyQuaternions(
     deltaRotationQuaternion,
-    cubeGroup.quaternion,
+    cubeGroup.quaternion, // must use .multiplyQuaternions and not .multiply due to non-commutativity
   );
-  // Update the previous position object for the next movement
+  // update for the next movement
   previousMousePosition = {
     x: event.clientX,
     y: event.clientY,
   };
 });
 
-// Handle turns, following standard Rubik's cube notation for faces
-// Direction is either c or i for clockwise/inverted
-function rotateFace(face, direction = "c") {
-  // Create a temporary subgroup for the face
+// handle turns
+function rotateFace(face, direction = DIRECTIONS.CLOCKWISE) {
   const tempSubGroup = new THREE.Group();
-  // Iterate through cubies in cubeGroup
-  const rotationAmount = ((direction === "i" ? 1 : -1) * Math.PI) / 2;
-  function getConditionFunction(conditionFace) {
-    switch (conditionFace) {
-      case "r":
-        return (cubie) => cubie.position.x > 0;
-      case "l":
-        return (cubie) => cubie.position.x < 0;
-      case "u":
-        return (cubie) => cubie.position.y > 0;
-      case "d":
-        return (cubie) => cubie.position.y < 0;
-      case "f":
-        return (cubie) => cubie.position.z > 0;
-      case "b":
-        return (cubie) => cubie.position.z < 0;
+  const rotationAmount =
+    ((direction === DIRECTIONS.CLOCKWISE ? 1 : -1) * Math.PI) / 2;
+  const conditionFunction = (() => {
+    switch (face) {
+      case Cube.FACES.RIGHT:
+        return (cubie) => cubie.position.x === 2;
+      case Cube.FACES.LEFT:
+        return (cubie) => cubie.position.x === 0;
+      case Cube.FACES.TOP:
+        return (cubie) => cubie.position.y === 2;
+      case Cube.FACES.BOTTOM:
+        return (cubie) => cubie.position.y === 0;
+      case Cube.FACES.BACK:
+        return (cubie) => cubie.position.z === 2;
+      case Cube.FACES.FRONT:
+        return (cubie) => cubie.position.z === 0;
       default:
         return () => false;
     }
-  }
+  })();
 
-  const conditionFunction = getConditionFunction(face);
+  // iterate backwards because they will be removed from the main group as they are added to the temp group
   for (let i = cubeGroup.children.length - 1; i >= 0; i -= 1) {
     const cubie = cubeGroup.children[i];
     if (conditionFunction(cubie)) {
@@ -165,53 +160,56 @@ function rotateFace(face, direction = "c") {
     }
   }
 
-  // Adjust rotation based on the face
   switch (face) {
-    case "r":
-      tempSubGroup.rotation.x += rotationAmount;
-      break;
-    case "l":
+    case Cube.FACES.RIGHT:
       tempSubGroup.rotation.x -= rotationAmount;
       break;
-    case "u":
-      tempSubGroup.rotation.y += rotationAmount;
+    case Cube.FACES.LEFT:
+      tempSubGroup.rotation.x += rotationAmount;
       break;
-    case "d":
+    case Cube.FACES.TOP:
       tempSubGroup.rotation.y -= rotationAmount;
       break;
-    case "f":
-      tempSubGroup.rotation.z += rotationAmount;
+    case Cube.FACES.BOTTOM:
+      tempSubGroup.rotation.y += rotationAmount;
       break;
-    case "b":
+    case Cube.FACES.BACK:
       tempSubGroup.rotation.z -= rotationAmount;
+      break;
+    case Cube.FACES.FRONT:
+      tempSubGroup.rotation.z += rotationAmount;
       break;
     default:
       break;
   }
 
-  // Update the rotation and position of each cubie in the temporary subgroup
+  // update rotation and position of each cubie in the temporary subgroup
   tempSubGroup.children.forEach((cubie) => {
     cubie.rotation.setFromQuaternion(
       cubie.quaternion
-        .clone()
+        .clone() // TODO: I think this clone can be removed - test it
         .invert()
         .multiply(tempSubGroup.quaternion.clone().invert())
-        .clone()
+        .clone() // TODO: I think this clone can be removed - test it
         .invert(),
     );
     cubie.position.applyQuaternion(tempSubGroup.quaternion);
-    // Round the positions to integers after rotation
+    // round the positions to integers after rotation to avoid cumulative float errors
     cubie.position.x = Math.round(cubie.position.x);
     cubie.position.y = Math.round(cubie.position.y);
     cubie.position.z = Math.round(cubie.position.z);
   });
 
-  // Add cubies back to the main cubeGroup
+  // return cubies back to the main cubeGroup
   for (let i = tempSubGroup.children.length - 1; i >= 0; i -= 1) {
     const cubie = tempSubGroup.children[i];
     cubeGroup.add(cubie);
   }
 }
+
+// -----
+// TODO -- rest of this file from here down hasn't been worked through yet
+// -----
 
 // Handle clicks for face turns
 function onMouseClick(event) {
