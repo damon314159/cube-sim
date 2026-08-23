@@ -16,7 +16,11 @@ const SCENE_PLANE_DISTANCES = {
   NEAR: 0.1,
   FAR: 1000,
 };
-const STARTING_Z_POSITION = 5;
+const CAMERA_STARTING_POSITION = {
+  x: 1,
+  y: 1,
+  z: 6,
+};
 const CUBIE_WIREFRAME_WIDTH = 2;
 const CUBIE_SIZE = 1;
 
@@ -27,7 +31,11 @@ const camera = new THREE.PerspectiveCamera(
   SCENE_PLANE_DISTANCES.NEAR,
   SCENE_PLANE_DISTANCES.FAR,
 );
-camera.position.z = STARTING_Z_POSITION;
+camera.position.set(
+  CAMERA_STARTING_POSITION.x,
+  CAMERA_STARTING_POSITION.y,
+  CAMERA_STARTING_POSITION.z,
+);
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -61,7 +69,6 @@ for (let x = 0; x < 3; x += 1) {
 
       const cubie = createCubieGeometry(cubieModel, { x, y, z }, CUBIE_SIZE);
       createCubieWireframe(cubie, CUBIE_WIREFRAME_WIDTH);
-      // TODO: previously the cubies were all centred on 0,0,0. Need to ensure that everything works now the centre is at 1,1,1 instead
       cubie.position.set(x * CUBIE_SIZE, y * CUBIE_SIZE, z * CUBIE_SIZE);
       cubeGroup.add(cubie);
 
@@ -109,7 +116,8 @@ document.addEventListener("mousemove", (event) => {
     y: event.clientY - previousMousePosition.y,
   };
 
-  const deltaRotationQuaternion = new THREE.Quaternion().setFromEuler(
+  const pivot = new THREE.Vector3(1, 1, 1);
+  const rotation = new THREE.Quaternion().setFromEuler(
     new THREE.Euler(
       convertDegreesToRadians(deltaMove.y * 1),
       convertDegreesToRadians(deltaMove.x * 1),
@@ -117,10 +125,11 @@ document.addEventListener("mousemove", (event) => {
       "XYZ",
     ),
   );
-  cubeGroup.quaternion.multiplyQuaternions(
-    deltaRotationQuaternion,
-    cubeGroup.quaternion, // must use .multiplyQuaternions and not .multiply due to non-commutativity
-  );
+  cubeGroup.position.sub(pivot);
+  cubeGroup.position.applyQuaternion(rotation);
+  cubeGroup.position.add(pivot);
+
+  cubeGroup.quaternion.premultiply(rotation);
   // update for the next movement
   previousMousePosition = {
     x: event.clientX,
@@ -159,25 +168,32 @@ function rotateFace(face, direction) {
       tempSubGroup.add(cubie);
     }
   }
+  const pivot = new THREE.Vector3(1, 1, 1);
 
   switch (face) {
     case Cube.FACES.RIGHT:
       tempSubGroup.rotation.x -= rotationAmount;
+      pivot.x = 2;
       break;
     case Cube.FACES.LEFT:
       tempSubGroup.rotation.x += rotationAmount;
+      pivot.x = 0;
       break;
     case Cube.FACES.TOP:
       tempSubGroup.rotation.y -= rotationAmount;
+      pivot.y = 2;
       break;
     case Cube.FACES.BOTTOM:
       tempSubGroup.rotation.y += rotationAmount;
+      pivot.y = 0;
       break;
     case Cube.FACES.BACK:
       tempSubGroup.rotation.z -= rotationAmount;
+      pivot.z = 2;
       break;
     case Cube.FACES.FRONT:
       tempSubGroup.rotation.z += rotationAmount;
+      pivot.z = 0;
       break;
     default:
       break;
@@ -193,7 +209,9 @@ function rotateFace(face, direction) {
         .clone() // TODO: I think this clone can be removed - test it
         .invert(),
     );
+    cubie.position.sub(pivot);
     cubie.position.applyQuaternion(tempSubGroup.quaternion);
+    cubie.position.add(pivot);
     // round the positions to integers after rotation to avoid cumulative float errors
     cubie.position.x = Math.round(cubie.position.x);
     cubie.position.y = Math.round(cubie.position.y);
@@ -283,12 +301,21 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+// TODO: abstract this rotation logic to a function, it's used twice
 // initial rotation to show front, right, and top faces
-cubeGroup.rotation.set(
-  convertDegreesToRadians(30),
-  convertDegreesToRadians(-35),
-  0,
+const pivot = new THREE.Vector3(1, 1, 1);
+const rotation = new THREE.Quaternion().setFromEuler(
+  new THREE.Euler(
+    convertDegreesToRadians(30),
+    convertDegreesToRadians(-35),
+    0,
+    "XYZ",
+  ),
 );
+cubeGroup.position.sub(pivot);
+cubeGroup.position.applyQuaternion(rotation);
+cubeGroup.position.add(pivot);
+cubeGroup.quaternion.premultiply(rotation);
 
 function animate() {
   requestAnimationFrame(animate);
