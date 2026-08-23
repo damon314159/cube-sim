@@ -120,7 +120,7 @@ const getCentreMaterials = (cubie, relativeCoords) => {
   return materials;
 };
 
-function getCubieType(relativeCoords) {
+export function getCubieType(relativeCoords) {
   const { x, y, z } = relativeCoords;
   const centredAxes = [x, y, z].filter((coord) => coord === 1).length;
   if (centredAxes === 0) {
@@ -139,10 +139,13 @@ function getCubieType(relativeCoords) {
  *
  * @param {Cubie} cubie - the cubie model to create geometry for
  * @param {Object} relativeCoords - from (0,0,0) to (2,2,2) describing which cubie this is
+ * @param {number} cubieSize - the size of the cubie to create
  */
 export function createCubieGeometry(cubie, relativeCoords, cubieSize) {
   const cubieType = getCubieType(relativeCoords);
-  if (!cubieType) return null;
+  if (!cubieType) {
+    throw new Error("Attempting to create geometry for core cubie");
+  }
 
   const cubieMaterials = (() => {
     if (cubieType === CUBIE_TYPES.CORNER) {

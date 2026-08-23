@@ -1,7 +1,12 @@
 import * as THREE from "three";
 import { Cube } from "../model/cube.js";
+import { CUBIE_TYPES } from "../model/cubies.js";
 import { convertDegreesToRadians } from "../utils/maths.js";
-import { createCubieGeometry, createCubieWireframe } from "./cubies.js";
+import {
+  createCubieGeometry,
+  createCubieWireframe,
+  getCubieType,
+} from "./cubies.js";
 
 const cube = new Cube();
 
@@ -30,30 +35,42 @@ document.body.appendChild(renderer.domElement);
 const cubeGroup = new THREE.Group();
 scene.add(cubeGroup);
 
-// -----
-// TODO -- rest of this file from here down hasn't been worked through yet
-// -----
-
 // Create and position the cubies
+const renderedCounts = {
+  [CUBIE_TYPES.CORNER]: 0,
+  [CUBIE_TYPES.EDGE]: 0,
+  [CUBIE_TYPES.CENTRE]: 0,
+};
 for (let x = 0; x < 3; x += 1) {
   for (let y = 0; y < 3; y += 1) {
     for (let z = 0; z < 3; z += 1) {
-      const cubie = createCubieGeometry(
-        cubieModel,
-        { x: 0, y: 0, z: 0 },
-        CUBIE_SIZE,
-      );
+      const cubieType = getCubieType({ x, y, z });
+      if (!cubieType) continue; // in the core of the cube, do not render
+
+      const cubieModel = (() => {
+        const currentPosition = renderedCounts[cubieType];
+        if (cubieType === CUBIE_TYPES.CORNER) {
+          return cube.corners[currentPosition];
+        }
+        if (cubieType === CUBIE_TYPES.EDGE) {
+          return cube.edges[currentPosition];
+        }
+        return cube.centres[currentPosition];
+      })();
+
+      const cubie = createCubieGeometry(cubieModel, { x, y, z }, CUBIE_SIZE);
       createCubieWireframe(cubie, CUBIE_WIREFRAME_WIDTH);
-      // Position the cubie
-      cubie.position.set(
-        (x - 1) * cubieSize,
-        (y - 1) * cubieSize,
-        (z - 1) * cubieSize,
-      );
+      cubie.position.set(x * CUBIE_SIZE, y * CUBIE_SIZE, z * CUBIE_SIZE);
       cubeGroup.add(cubie);
+
+      renderedCounts[cubieType] += 1;
     }
   }
 }
+
+// -----
+// TODO -- rest of this file from here down hasn't been worked through yet
+// -----
 
 // Handle window resizing
 window.addEventListener("resize", () => {
