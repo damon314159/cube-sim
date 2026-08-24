@@ -11,18 +11,21 @@ import {
 
 const cube = new Cube();
 
+const CUBIE_WIREFRAME_WIDTH = 2;
+const CUBIE_SIZE = 5;
+
 const SCENE_FOV = 75;
 const SCENE_PLANE_DISTANCES = {
   NEAR: 0.1,
   FAR: 1000,
 };
+
 const CAMERA_STARTING_POSITION = {
-  x: 1,
-  y: 1,
-  z: 6,
+  x: 1 * CUBIE_SIZE,
+  y: 1 * CUBIE_SIZE,
+  z: 6 * CUBIE_SIZE,
 };
-const CUBIE_WIREFRAME_WIDTH = 2;
-const CUBIE_SIZE = 1;
+const CAMERA_STARTING_ROTATION = { x: 0, y: 0, z: 0 };
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -35,6 +38,11 @@ camera.position.set(
   CAMERA_STARTING_POSITION.x,
   CAMERA_STARTING_POSITION.y,
   CAMERA_STARTING_POSITION.z,
+);
+camera.rotation.set(
+  CAMERA_STARTING_ROTATION.x,
+  CAMERA_STARTING_ROTATION.y,
+  CAMERA_STARTING_ROTATION.z,
 );
 
 const renderer = new THREE.WebGLRenderer();
@@ -116,7 +124,11 @@ document.addEventListener("mousemove", (event) => {
     y: event.clientY - previousMousePosition.y,
   };
 
-  const pivot = new THREE.Vector3(1, 1, 1);
+  const pivot = new THREE.Vector3(
+    1 * CUBIE_SIZE,
+    1 * CUBIE_SIZE,
+    1 * CUBIE_SIZE,
+  );
   const rotation = new THREE.Quaternion().setFromEuler(
     new THREE.Euler(
       convertDegreesToRadians(deltaMove.y * 1),
@@ -145,17 +157,17 @@ function rotateFace(face, direction) {
   const conditionFunction = (() => {
     switch (face) {
       case Cube.FACES.RIGHT:
-        return (cubie) => cubie.position.x === 2;
+        return (cubie) => cubie.position.x === 2 * CUBIE_SIZE;
       case Cube.FACES.LEFT:
-        return (cubie) => cubie.position.x === 0;
+        return (cubie) => cubie.position.x === 0 * CUBIE_SIZE;
       case Cube.FACES.TOP:
-        return (cubie) => cubie.position.y === 2;
+        return (cubie) => cubie.position.y === 2 * CUBIE_SIZE;
       case Cube.FACES.BOTTOM:
-        return (cubie) => cubie.position.y === 0;
+        return (cubie) => cubie.position.y === 0 * CUBIE_SIZE;
       case Cube.FACES.BACK:
-        return (cubie) => cubie.position.z === 2;
+        return (cubie) => cubie.position.z === 2 * CUBIE_SIZE;
       case Cube.FACES.FRONT:
-        return (cubie) => cubie.position.z === 0;
+        return (cubie) => cubie.position.z === 0 * CUBIE_SIZE;
       default:
         return () => false;
     }
@@ -168,32 +180,36 @@ function rotateFace(face, direction) {
       tempSubGroup.add(cubie);
     }
   }
-  const pivot = new THREE.Vector3(1, 1, 1);
+  const pivot = new THREE.Vector3(
+    1 * CUBIE_SIZE,
+    1 * CUBIE_SIZE,
+    1 * CUBIE_SIZE,
+  );
 
   switch (face) {
     case Cube.FACES.RIGHT:
       tempSubGroup.rotation.x -= rotationAmount;
-      pivot.x = 2;
+      pivot.x = 2 * CUBIE_SIZE;
       break;
     case Cube.FACES.LEFT:
       tempSubGroup.rotation.x += rotationAmount;
-      pivot.x = 0;
+      pivot.x = 0 * CUBIE_SIZE;
       break;
     case Cube.FACES.TOP:
       tempSubGroup.rotation.y -= rotationAmount;
-      pivot.y = 2;
+      pivot.y = 2 * CUBIE_SIZE;
       break;
     case Cube.FACES.BOTTOM:
       tempSubGroup.rotation.y += rotationAmount;
-      pivot.y = 0;
+      pivot.y = 0 * CUBIE_SIZE;
       break;
     case Cube.FACES.BACK:
       tempSubGroup.rotation.z -= rotationAmount;
-      pivot.z = 2;
+      pivot.z = 2 * CUBIE_SIZE;
       break;
     case Cube.FACES.FRONT:
       tempSubGroup.rotation.z += rotationAmount;
-      pivot.z = 0;
+      pivot.z = 0 * CUBIE_SIZE;
       break;
     default:
       break;
@@ -254,12 +270,12 @@ function onMouseClick(event) {
       if (isCentre) {
         let face;
         const [x, y, z] = Object.values(intersects[i].object.position);
-        if (x === 2) face = Cube.FACES.RIGHT;
-        if (x === 0) face = Cube.FACES.LEFT;
-        if (y === 2) face = Cube.FACES.TOP;
-        if (y === 0) face = Cube.FACES.BOTTOM;
-        if (z === 2) face = Cube.FACES.BACK;
-        if (z === 0) face = Cube.FACES.FRONT;
+        if (x === 2 * CUBIE_SIZE) face = Cube.FACES.RIGHT;
+        if (x === 0 * CUBIE_SIZE) face = Cube.FACES.LEFT;
+        if (y === 2 * CUBIE_SIZE) face = Cube.FACES.TOP;
+        if (y === 0 * CUBIE_SIZE) face = Cube.FACES.BOTTOM;
+        if (z === 2 * CUBIE_SIZE) face = Cube.FACES.BACK;
+        if (z === 0 * CUBIE_SIZE) face = Cube.FACES.FRONT;
         rotateFace(face, direction);
 
         const cubeNotationFaceLetter = (() => {
@@ -303,7 +319,7 @@ document.addEventListener("keydown", (event) => {
 
 // TODO: abstract this rotation logic to a function, it's used twice
 // initial rotation to show front, right, and top faces
-const pivot = new THREE.Vector3(1, 1, 1);
+const pivot = new THREE.Vector3(1 * CUBIE_SIZE, 1 * CUBIE_SIZE, 1 * CUBIE_SIZE);
 const rotation = new THREE.Quaternion().setFromEuler(
   new THREE.Euler(
     convertDegreesToRadians(30),
