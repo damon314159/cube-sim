@@ -6,7 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack",
-    "serve": "webpack serve --mode=development"
+    "serve": "webpack serve --mode=development",
+    "dev": "npm run serve",
+    "lint": "npx eslint --fix \"**/*.js\"",
+    "format": "npx prettier -w \"**/*.{js,html,css}\""
   },
   "author": "",
   "license": "MIT",
@@ -22,6 +25,7 @@
     "html-loader": "^4.2.0",
     "html-webpack-plugin": "^5.5.3",
     "path": "^0.12.7",
+    "prettier": "^3.9.6",
     "style-loader": "^3.3.3",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4",

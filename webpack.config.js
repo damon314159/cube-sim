@@ -1,35 +1,35 @@
-const path = require('path')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
+const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
-  entry: './src/index.js',
+  entry: "./src/index.js",
   output: {
-    filename: '[name].bundle.js',
-    path: path.resolve(__dirname, 'dist')
+    filename: "[name].bundle.js",
+    path: path.resolve(__dirname, "dist"),
   },
   plugins: [
     new HtmlWebpackPlugin({
-      loader: 'html-loader',
-      filename: 'index.html',
-      template: './src/html/index.template.html',
-      title: 'Cube Simulator'
-    })
+      loader: "html-loader",
+      filename: "index.html",
+      template: "./src/html/index.template.html",
+      title: "Cube Simulator",
+    }),
   ],
   module: {
     rules: [
       {
         test: /\.css$/i,
-        use: ['style-loader', 'css-loader']
+        use: ["style-loader", "css-loader"],
       },
       {
         test: /\.(png|svg|jpg|jpeg|gif)$/i,
-        type: 'asset/resource'
+        type: "asset/resource",
       },
       {
         test: /\.html$/i,
-        loader: 'html-loader'
-      }
-    ]
+        loader: "html-loader",
+      },
+    ],
   },
-  devtool: 'inline-source-map'
-}
+  devtool: "inline-source-map",
+};
