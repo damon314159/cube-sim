@@ -11,8 +11,8 @@ const getBlankMaterials = () => ({
   left: internalMaterial,
   top: internalMaterial,
   bottom: internalMaterial,
-  back: internalMaterial,
   front: internalMaterial,
+  back: internalMaterial,
 });
 const getMaterial = (colour) => new THREE.MeshBasicMaterial({ color: colour });
 
@@ -25,43 +25,43 @@ const getCornerMaterials = (cubie, relativeCoords) => {
   switch (coordsString) {
     case "0,0,0":
       materials.bottom = getMaterial(stickers[0]);
-      materials.left = getMaterial(stickers[1]);
-      materials.front = getMaterial(stickers[2]);
+      materials.back = getMaterial(stickers[1]);
+      materials.left = getMaterial(stickers[2]);
       break;
     case "0,0,2":
       materials.bottom = getMaterial(stickers[0]);
-      materials.back = getMaterial(stickers[1]);
-      materials.left = getMaterial(stickers[2]);
+      materials.left = getMaterial(stickers[1]);
+      materials.front = getMaterial(stickers[2]);
       break;
     case "0,2,0":
-      materials.top = getMaterial(stickers[0]);
-      materials.front = getMaterial(stickers[1]);
-      materials.left = getMaterial(stickers[2]);
-      break;
-    case "0,2,2":
       materials.top = getMaterial(stickers[0]);
       materials.left = getMaterial(stickers[1]);
       materials.back = getMaterial(stickers[2]);
       break;
-    case "2,0,0":
-      materials.bottom = getMaterial(stickers[0]);
+    case "0,2,2":
+      materials.top = getMaterial(stickers[0]);
       materials.front = getMaterial(stickers[1]);
-      materials.right = getMaterial(stickers[2]);
+      materials.left = getMaterial(stickers[2]);
       break;
-    case "2,0,2":
+    case "2,0,0":
       materials.bottom = getMaterial(stickers[0]);
       materials.right = getMaterial(stickers[1]);
       materials.back = getMaterial(stickers[2]);
       break;
-    case "2,2,0":
-      materials.top = getMaterial(stickers[0]);
-      materials.right = getMaterial(stickers[1]);
-      materials.front = getMaterial(stickers[2]);
+    case "2,0,2":
+      materials.bottom = getMaterial(stickers[0]);
+      materials.front = getMaterial(stickers[1]);
+      materials.right = getMaterial(stickers[2]);
       break;
-    case "2,2,2":
+    case "2,2,0":
       materials.top = getMaterial(stickers[0]);
       materials.back = getMaterial(stickers[1]);
       materials.right = getMaterial(stickers[2]);
+      break;
+    case "2,2,2":
+      materials.top = getMaterial(stickers[0]);
+      materials.right = getMaterial(stickers[1]);
+      materials.front = getMaterial(stickers[2]);
       break;
     default:
       throw new Error(`Unknown corner cubie relativeCoords: ${relativeCoords}`);
@@ -79,9 +79,9 @@ const getEdgeMaterials = (cubie, relativeCoords) => {
   } else if (y === 0) {
     materials.bottom = getMaterial(stickers[0]);
   } else if (z === 2) {
-    materials.back = getMaterial(stickers[0]);
-  } else {
     materials.front = getMaterial(stickers[0]);
+  } else {
+    materials.back = getMaterial(stickers[0]);
   }
   // determine "secondary" sticker location. left/right have lowest priority, then front/back
   if (x === 2) {
@@ -89,9 +89,9 @@ const getEdgeMaterials = (cubie, relativeCoords) => {
   } else if (x === 0) {
     materials.left = getMaterial(stickers[1]);
   } else if (z === 2) {
-    materials.back = getMaterial(stickers[1]);
-  } else {
     materials.front = getMaterial(stickers[1]);
+  } else {
+    materials.back = getMaterial(stickers[1]);
   }
   return materials;
 };
@@ -113,9 +113,9 @@ const getCentreMaterials = (cubie, relativeCoords) => {
   } else if (y === 0) {
     materials.bottom = centreMaterial;
   } else if (z === 2) {
-    materials.back = centreMaterial;
-  } else {
     materials.front = centreMaterial;
+  } else {
+    materials.back = centreMaterial;
   }
   return materials;
 };
@@ -163,8 +163,8 @@ export function createCubieGeometry(cubie, relativeCoords, cubieSize) {
     cubieMaterials.left,
     cubieMaterials.top,
     cubieMaterials.bottom,
-    cubieMaterials.back,
     cubieMaterials.front,
+    cubieMaterials.back,
   ]);
 }
 

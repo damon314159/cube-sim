@@ -164,9 +164,9 @@ function rotateFace(face, direction) {
         return (cubie) => cubie.position.y === 2 * CUBIE_SIZE;
       case Cube.FACES.BOTTOM:
         return (cubie) => cubie.position.y === 0 * CUBIE_SIZE;
-      case Cube.FACES.BACK:
-        return (cubie) => cubie.position.z === 2 * CUBIE_SIZE;
       case Cube.FACES.FRONT:
+        return (cubie) => cubie.position.z === 2 * CUBIE_SIZE;
+      case Cube.FACES.BACK:
         return (cubie) => cubie.position.z === 0 * CUBIE_SIZE;
       default:
         return () => false;
@@ -203,11 +203,11 @@ function rotateFace(face, direction) {
       tempSubGroup.rotation.y += rotationAmount;
       pivot.y = 0 * CUBIE_SIZE;
       break;
-    case Cube.FACES.BACK:
+    case Cube.FACES.FRONT:
       tempSubGroup.rotation.z -= rotationAmount;
       pivot.z = 2 * CUBIE_SIZE;
       break;
-    case Cube.FACES.FRONT:
+    case Cube.FACES.BACK:
       tempSubGroup.rotation.z += rotationAmount;
       pivot.z = 0 * CUBIE_SIZE;
       break;
@@ -274,8 +274,8 @@ function onMouseClick(event) {
         if (x === 0 * CUBIE_SIZE) face = Cube.FACES.LEFT;
         if (y === 2 * CUBIE_SIZE) face = Cube.FACES.TOP;
         if (y === 0 * CUBIE_SIZE) face = Cube.FACES.BOTTOM;
-        if (z === 2 * CUBIE_SIZE) face = Cube.FACES.BACK;
-        if (z === 0 * CUBIE_SIZE) face = Cube.FACES.FRONT;
+        if (z === 2 * CUBIE_SIZE) face = Cube.FACES.FRONT;
+        if (z === 0 * CUBIE_SIZE) face = Cube.FACES.BACK;
         rotateFace(face, direction);
 
         const cubeNotationFaceLetter = (() => {
@@ -288,10 +288,10 @@ function onMouseClick(event) {
               return "U";
             case Cube.FACES.BOTTOM:
               return "D";
-            case Cube.FACES.BACK:
-              return "B";
             case Cube.FACES.FRONT:
               return "F";
+            case Cube.FACES.BACK:
+              return "B";
             default:
               throw new Error(
                 `Unknown face in face enum to cube notation map: ${face}`,

@@ -20,14 +20,14 @@ export class Cube {
     // by a nested for loop with x outermost then y then z innermost.
     // see ./cube-position-labelling.jpg for visual aid
     const cornerColourTriples = [
-      [COLOURS.BOTTOM, COLOURS.LEFT, COLOURS.FRONT],
       [COLOURS.BOTTOM, COLOURS.BACK, COLOURS.LEFT],
-      [COLOURS.TOP, COLOURS.FRONT, COLOURS.LEFT],
+      [COLOURS.BOTTOM, COLOURS.LEFT, COLOURS.FRONT],
       [COLOURS.TOP, COLOURS.LEFT, COLOURS.BACK],
-      [COLOURS.BOTTOM, COLOURS.FRONT, COLOURS.RIGHT],
+      [COLOURS.TOP, COLOURS.FRONT, COLOURS.LEFT],
       [COLOURS.BOTTOM, COLOURS.RIGHT, COLOURS.BACK],
-      [COLOURS.TOP, COLOURS.RIGHT, COLOURS.FRONT],
+      [COLOURS.BOTTOM, COLOURS.FRONT, COLOURS.RIGHT],
       [COLOURS.TOP, COLOURS.BACK, COLOURS.RIGHT],
+      [COLOURS.TOP, COLOURS.RIGHT, COLOURS.FRONT],
     ];
     this.corners = cornerColourTriples.map(
       ([colour1, colour2, colour3], index) =>
@@ -36,16 +36,16 @@ export class Cube {
 
     const edgeColourPairs = [
       [COLOURS.BOTTOM, COLOURS.LEFT],
-      [COLOURS.FRONT, COLOURS.LEFT],
       [COLOURS.BACK, COLOURS.LEFT],
+      [COLOURS.FRONT, COLOURS.LEFT],
       [COLOURS.TOP, COLOURS.LEFT],
-      [COLOURS.BOTTOM, COLOURS.FRONT],
       [COLOURS.BOTTOM, COLOURS.BACK],
-      [COLOURS.TOP, COLOURS.FRONT],
+      [COLOURS.BOTTOM, COLOURS.FRONT],
       [COLOURS.TOP, COLOURS.BACK],
+      [COLOURS.TOP, COLOURS.FRONT],
       [COLOURS.BOTTOM, COLOURS.RIGHT],
-      [COLOURS.FRONT, COLOURS.RIGHT],
       [COLOURS.BACK, COLOURS.RIGHT],
+      [COLOURS.FRONT, COLOURS.RIGHT],
       [COLOURS.TOP, COLOURS.RIGHT],
     ];
     this.edges = edgeColourPairs.map(
@@ -56,8 +56,8 @@ export class Cube {
     const centreColours = [
       COLOURS.LEFT,
       COLOURS.BOTTOM,
-      COLOURS.FRONT,
       COLOURS.BACK,
+      COLOURS.FRONT,
       COLOURS.TOP,
       COLOURS.RIGHT,
     ];
@@ -69,12 +69,12 @@ export class Cube {
 
   #faceTurnCorners(face, direction) {
     const positionsToCycleClockwise = new Map([
-      [Cube.FACES.TOP, [2, 3, 7, 6]],
-      [Cube.FACES.BOTTOM, [0, 4, 5, 1]],
-      [Cube.FACES.FRONT, [0, 2, 6, 4]],
-      [Cube.FACES.LEFT, [0, 1, 3, 2]],
-      [Cube.FACES.BACK, [1, 5, 7, 3]],
-      [Cube.FACES.RIGHT, [4, 6, 7, 5]],
+      [Cube.FACES.TOP, [2, 6, 7, 3]],
+      [Cube.FACES.BOTTOM, [0, 1, 5, 4]],
+      [Cube.FACES.FRONT, [1, 3, 7, 5]],
+      [Cube.FACES.LEFT, [0, 2, 3, 1]],
+      [Cube.FACES.BACK, [0, 4, 6, 2]],
+      [Cube.FACES.RIGHT, [4, 5, 7, 6]],
     ]).get(face);
     const positionsToCycle =
       direction === DIRECTIONS.CLOCKWISE
@@ -100,12 +100,12 @@ export class Cube {
 
   #faceTurnEdges(face, direction) {
     const positionsToCycleClockwise = new Map([
-      [Cube.FACES.TOP, [3, 7, 11, 6]],
-      [Cube.FACES.BOTTOM, [0, 4, 8, 5]],
-      [Cube.FACES.FRONT, [1, 6, 9, 4]],
-      [Cube.FACES.LEFT, [0, 2, 3, 1]],
-      [Cube.FACES.BACK, [2, 5, 10, 7]],
-      [Cube.FACES.RIGHT, [8, 9, 11, 10]],
+      [Cube.FACES.TOP, [3, 6, 11, 7]],
+      [Cube.FACES.BOTTOM, [0, 5, 8, 4]],
+      [Cube.FACES.FRONT, [2, 7, 10, 5]],
+      [Cube.FACES.LEFT, [0, 1, 3, 2]],
+      [Cube.FACES.BACK, [1, 4, 9, 6]],
+      [Cube.FACES.RIGHT, [8, 10, 11, 9]],
     ]).get(face);
     const positionsToCycle =
       direction === DIRECTIONS.CLOCKWISE
