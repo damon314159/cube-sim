@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { CUBIE_SIZE, CUBIE_WIREFRAME_WIDTH } from "../constants/dimensions.js";
 import { DIRECTIONS } from "../constants/directions.js";
 import { Cube } from "../model/cube.js";
 import { CUBIE_TYPES } from "../model/cubies.js";
@@ -11,48 +12,9 @@ import {
 
 const cube = new Cube();
 
-const CUBIE_WIREFRAME_WIDTH = 2;
-const CUBIE_SIZE = 5;
-
-const SCENE_FOV = 75;
-const SCENE_PLANE_DISTANCES = {
-  NEAR: 0.1,
-  FAR: 1000,
-};
-
-const CAMERA_STARTING_POSITION = {
-  x: 1 * CUBIE_SIZE,
-  y: 1 * CUBIE_SIZE,
-  z: 6 * CUBIE_SIZE,
-};
-const CAMERA_STARTING_ROTATION = { x: 0, y: 0, z: 0 };
-
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(
-  SCENE_FOV,
-  window.innerWidth / window.innerHeight,
-  SCENE_PLANE_DISTANCES.NEAR,
-  SCENE_PLANE_DISTANCES.FAR,
-);
-camera.position.set(
-  CAMERA_STARTING_POSITION.x,
-  CAMERA_STARTING_POSITION.y,
-  CAMERA_STARTING_POSITION.z,
-);
-camera.rotation.set(
-  CAMERA_STARTING_ROTATION.x,
-  CAMERA_STARTING_ROTATION.y,
-  CAMERA_STARTING_ROTATION.z,
-);
-
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
-
 const cubeGroup = new THREE.Group();
-scene.add(cubeGroup);
 
-// Create and position the cubies
+// create and position the cubies
 const renderedCounts = {
   [CUBIE_TYPES.CORNER]: 0,
   [CUBIE_TYPES.EDGE]: 0,
@@ -85,45 +47,7 @@ for (let x = 0; x < 3; x += 1) {
   }
 }
 
-window.addEventListener("resize", () => {
-  const newWidth = window.innerWidth;
-  const newHeight = window.innerHeight;
-  camera.aspect = newWidth / newHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(newWidth, newHeight);
-});
-
-// Suppress standard right click menu
-// TODO: make right click clockwise and left click anticlockwise
-document.addEventListener("contextmenu", (event) => {
-  event.preventDefault();
-});
-
-// Handle right click + drag for cube rotations
-let isDragging = false;
-let previousMousePosition = { x: 0, y: 0 };
-document.addEventListener("mousedown", (event) => {
-  if (event.button !== 2) return; // right mouse button only
-  isDragging = true;
-  previousMousePosition = {
-    x: event.clientX,
-    y: event.clientY,
-  };
-  // Prevent the default behavior of the right mouse button
-  event.preventDefault();
-});
-
-document.addEventListener("mouseup", () => {
-  isDragging = false;
-});
-
-document.addEventListener("mousemove", (event) => {
-  if (!isDragging) return;
-  const deltaMove = {
-    x: event.clientX - previousMousePosition.x,
-    y: event.clientY - previousMousePosition.y,
-  };
-
+cubeGroup.rotateCube = function rotateCube(deltaX, deltaY) {
   const pivot = new THREE.Vector3(
     1 * CUBIE_SIZE,
     1 * CUBIE_SIZE,
@@ -131,8 +55,8 @@ document.addEventListener("mousemove", (event) => {
   );
   const rotation = new THREE.Quaternion().setFromEuler(
     new THREE.Euler(
-      convertDegreesToRadians(deltaMove.y * 1),
-      convertDegreesToRadians(deltaMove.x * 1),
+      convertDegreesToRadians(deltaY),
+      convertDegreesToRadians(deltaX),
       0,
       "XYZ",
     ),
@@ -141,15 +65,9 @@ document.addEventListener("mousemove", (event) => {
   cubeGroup.position.applyQuaternion(rotation);
   cubeGroup.position.add(pivot);
   cubeGroup.quaternion.premultiply(rotation);
-  // update for the next movement
-  previousMousePosition = {
-    x: event.clientX,
-    y: event.clientY,
-  };
-});
+};
 
-// handle turns
-function rotateFace(face, direction) {
+function rotateFaceInRender(face, direction) {
   const tempSubGroup = new THREE.Group();
   const rotationAmount =
     ((direction === DIRECTIONS.CLOCKWISE ? 1 : -1) * Math.PI) / 2;
@@ -233,75 +151,41 @@ function rotateFace(face, direction) {
   }
 }
 
-// Handle clicks for face turns
-function onMouseClick(event) {
-  if (event.button !== 0) {
-    return; // left click only
-  }
-  const isShiftHeld = event.shiftKey;
-  const direction = isShiftHeld
-    ? DIRECTIONS.ANTI_CLOCKWISE
-    : DIRECTIONS.CLOCKWISE;
-
-  // Calculate mouse coordinates
-  const mouse = new THREE.Vector2();
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-  // Create a raycaster and check for intersections
-  const raycaster = new THREE.Raycaster();
-  raycaster.setFromCamera(mouse, camera);
-
-  const intersects = raycaster.intersectObjects(cubeGroup.children, true);
-  for (let i = 0; i < intersects.length; i += 1) {
-    // Find the first raycast intersection that is a face
-    if (intersects[i].face) {
-      const isCentre = intersects[i].object.material.some(
-        (material) => material.name === "centreCubie",
-      );
-      if (isCentre) {
-        let face;
-        const [x, y, z] = Object.values(intersects[i].object.position);
-        if (x === 2 * CUBIE_SIZE) face = Cube.FACES.RIGHT;
-        if (x === 0 * CUBIE_SIZE) face = Cube.FACES.LEFT;
-        if (y === 2 * CUBIE_SIZE) face = Cube.FACES.TOP;
-        if (y === 0 * CUBIE_SIZE) face = Cube.FACES.BOTTOM;
-        if (z === 2 * CUBIE_SIZE) face = Cube.FACES.FRONT;
-        if (z === 0 * CUBIE_SIZE) face = Cube.FACES.BACK;
-        rotateFace(face, direction);
-
-        const cubeNotationFaceLetter = (() => {
-          switch (face) {
-            case Cube.FACES.RIGHT:
-              return "R";
-            case Cube.FACES.LEFT:
-              return "L";
-            case Cube.FACES.TOP:
-              return "U";
-            case Cube.FACES.BOTTOM:
-              return "D";
-            case Cube.FACES.FRONT:
-              return "F";
-            case Cube.FACES.BACK:
-              return "B";
-            default:
-              throw new Error(
-                `Unknown face in face enum to cube notation map: ${face}`,
-              );
-          }
-        })();
-        const cubeNotationDirectionLetter =
-          direction === DIRECTIONS.CLOCKWISE ? "" : "i";
-        const cubeTurnMethodName = `turn${cubeNotationFaceLetter}${cubeNotationDirectionLetter}`;
-        cube[cubeTurnMethodName]();
-      }
-      // stop checking the ray here since any other intersections are background
-      break;
+function rotateFaceInModel(face, direction) {
+  const cubeNotationFaceLetter = (() => {
+    switch (face) {
+      case Cube.FACES.RIGHT:
+        return "R";
+      case Cube.FACES.LEFT:
+        return "L";
+      case Cube.FACES.TOP:
+        return "U";
+      case Cube.FACES.BOTTOM:
+        return "D";
+      case Cube.FACES.FRONT:
+        return "F";
+      case Cube.FACES.BACK:
+        return "B";
+      default:
+        throw new Error(
+          `Unknown face in face enum to cube notation map: ${face}`,
+        );
     }
-  }
+  })();
+  const cubeNotationDirectionLetter =
+    direction === DIRECTIONS.CLOCKWISE ? "" : "i";
+  const cubeTurnMethodName = `turn${cubeNotationFaceLetter}${cubeNotationDirectionLetter}`;
+  cube[cubeTurnMethodName]();
 }
-renderer.domElement.addEventListener("click", onMouseClick);
 
+cubeGroup.rotateFace = function rotateFace(face, direction) {
+  rotateFaceInRender(face, direction);
+  rotateFaceInModel(face, direction);
+};
+
+cubeGroup.FACES = Cube.FACES;
+
+// temp: for debugging purposes
 document.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     // Call cube.isSolved and alert the result
@@ -309,25 +193,4 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-// TODO: abstract this rotation logic to a function, it's used twice
-// initial rotation to show front, right, and top faces
-const pivot = new THREE.Vector3(1 * CUBIE_SIZE, 1 * CUBIE_SIZE, 1 * CUBIE_SIZE);
-const rotation = new THREE.Quaternion().setFromEuler(
-  new THREE.Euler(
-    convertDegreesToRadians(30),
-    convertDegreesToRadians(-35),
-    0,
-    "XYZ",
-  ),
-);
-cubeGroup.position.sub(pivot);
-cubeGroup.position.applyQuaternion(rotation);
-cubeGroup.position.add(pivot);
-cubeGroup.quaternion.premultiply(rotation);
-
-function animate() {
-  requestAnimationFrame(animate);
-  renderer.render(scene, camera);
-}
-
-animate();
+export { cubeGroup as cube };
