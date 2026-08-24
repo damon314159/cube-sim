@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import { CUBIE_SIZE } from "../constants/dimensions.js";
 import { DIRECTIONS } from "../constants/directions.js";
 
 function handleWindowResize(renderer, camera) {
@@ -79,27 +78,16 @@ function handleClickFaceTurns(camera, cube) {
     raycaster.setFromCamera(mouse, camera);
 
     const intersects = raycaster.intersectObjects(cube.children, true);
-    for (let i = 0; i < intersects.length; i += 1) {
-      // Find the first raycast intersection that is a face
-      if (intersects[i].face) {
-        const isCentre = intersects[i].object.material.some(
-          (material) => material.name === "centreCubie",
-        );
-        if (isCentre) {
-          let face;
-          const [x, y, z] = Object.values(intersects[i].object.position);
-          if (x === 2 * CUBIE_SIZE) face = cube.FACES.RIGHT;
-          if (x === 0 * CUBIE_SIZE) face = cube.FACES.LEFT;
-          if (y === 2 * CUBIE_SIZE) face = cube.FACES.TOP;
-          if (y === 0 * CUBIE_SIZE) face = cube.FACES.BOTTOM;
-          if (z === 2 * CUBIE_SIZE) face = cube.FACES.FRONT;
-          if (z === 0 * CUBIE_SIZE) face = cube.FACES.BACK;
-          cube.rotateFace(face, direction);
-        }
-        // stop checking the ray here since any other intersections are background
-        break;
-      }
-    }
+    const firstFaceIntersected = intersects.find((intersect) => intersect.face);
+    if (!firstFaceIntersected) return;
+    const objectIntersected = firstFaceIntersected.object;
+    const isCentre = objectIntersected.material.some(
+      (material) => material.name === "centreCubie",
+    );
+    if (!isCentre) return;
+    const [x, y, z] = Object.values(objectIntersected.position);
+    const face = cube.queryCentreCubieFace({ x, y, z });
+    cube.rotateFace(face, direction);
   };
 }
 

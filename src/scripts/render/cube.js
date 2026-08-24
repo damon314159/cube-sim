@@ -183,9 +183,19 @@ cubeGroup.rotateFace = function rotateFace(face, direction) {
   rotateFaceInModel(face, direction);
 };
 
-cubeGroup.FACES = Cube.FACES;
+cubeGroup.queryCentreCubieFace = function queryCentreCubieFace(relativeCoords) {
+  const { x, y, z } = relativeCoords;
+  if (x === 2 * CUBIE_SIZE) return Cube.FACES.RIGHT;
+  if (x === 0 * CUBIE_SIZE) return Cube.FACES.LEFT;
+  if (y === 2 * CUBIE_SIZE) return Cube.FACES.TOP;
+  if (y === 0 * CUBIE_SIZE) return Cube.FACES.BOTTOM;
+  if (z === 2 * CUBIE_SIZE) return Cube.FACES.FRONT;
+  if (z === 0 * CUBIE_SIZE) return Cube.FACES.BACK;
+  throw new Error(`Unknown centre cubie coords in query: ${relativeCoords}`);
+};
 
 // temp: for debugging purposes
+// TODO: replace this with a popup dialogue when a scrambled puzzle is returned to solved
 document.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     // Call cube.isSolved and alert the result

@@ -271,6 +271,7 @@ export class Cube {
   }
 
   scramble() {
+    // TODO: add a way to trigger this and repaint the puzzle render
     this.#scrambleCorners();
     this.#scrambleEdges();
     this.#scrambleParityFix();
