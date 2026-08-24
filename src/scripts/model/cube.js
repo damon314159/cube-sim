@@ -84,7 +84,7 @@ export class Cube {
     cycleArrayElementsAtIndices(this.corners, positionsToCycle);
 
     // corners naturally rotate as turns are made, we need to update their orientations
-    const rotationIncrementsPerPosition = new Map([
+    const rotationIncrementsPerPositionClockwise = new Map([
       [Cube.FACES.TOP, [0, 0, 0, 0]],
       [Cube.FACES.BOTTOM, [0, 0, 0, 0]],
       [Cube.FACES.FRONT, [2, 1, 2, 1]],
@@ -92,6 +92,11 @@ export class Cube {
       [Cube.FACES.BACK, [2, 1, 2, 1]],
       [Cube.FACES.RIGHT, [2, 1, 2, 1]],
     ]).get(face);
+    const rotationIncrementsPerPosition =
+      direction === DIRECTIONS.CLOCKWISE
+        ? rotationIncrementsPerPositionClockwise
+        : rotationIncrementsPerPositionClockwise.toReversed();
+
     rotationIncrementsPerPosition.forEach((increment, index) => {
       const corner = this.corners[positionsToCycle[index]];
       corner.rotate(increment);
