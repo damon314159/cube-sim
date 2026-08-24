@@ -13,7 +13,7 @@ export function inversions(arr) {
   let count = 0;
   // loop over all pairs
   for (let i = 0; i < arr.length; i += 1) {
-    for (let j = i + 1; j < arr.length; i += 1) {
+    for (let j = i + 1; j < arr.length; j += 1) {
       if (arr[i] > arr[j]) {
         // they are in the wrong relative order, +1 inversion
         count += 1;
