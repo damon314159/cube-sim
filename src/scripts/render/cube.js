@@ -140,7 +140,6 @@ document.addEventListener("mousemove", (event) => {
   cubeGroup.position.sub(pivot);
   cubeGroup.position.applyQuaternion(rotation);
   cubeGroup.position.add(pivot);
-
   cubeGroup.quaternion.premultiply(rotation);
   // update for the next movement
   previousMousePosition = {
@@ -217,17 +216,10 @@ function rotateFace(face, direction) {
 
   // update rotation and position of each cubie in the temporary subgroup
   tempSubGroup.children.forEach((cubie) => {
-    cubie.rotation.setFromQuaternion(
-      cubie.quaternion
-        .clone() // TODO: I think this clone can be removed - test it
-        .invert()
-        .multiply(tempSubGroup.quaternion.clone().invert())
-        .clone() // TODO: I think this clone can be removed - test it
-        .invert(),
-    );
     cubie.position.sub(pivot);
     cubie.position.applyQuaternion(tempSubGroup.quaternion);
     cubie.position.add(pivot);
+    cubie.quaternion.premultiply(tempSubGroup.quaternion);
     // round the positions to integers after rotation to avoid cumulative float errors
     cubie.position.x = Math.round(cubie.position.x);
     cubie.position.y = Math.round(cubie.position.y);
