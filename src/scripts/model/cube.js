@@ -87,8 +87,8 @@ export class Cube {
     const rotationIncrementsPerPositionClockwise = new Map([
       [Cube.FACES.TOP, [0, 0, 0, 0]],
       [Cube.FACES.BOTTOM, [0, 0, 0, 0]],
-      [Cube.FACES.FRONT, [2, 1, 2, 1]],
-      [Cube.FACES.LEFT, [2, 1, 2, 1]],
+      [Cube.FACES.FRONT, [1, 2, 1, 2]],
+      [Cube.FACES.LEFT, [1, 2, 1, 2]],
       [Cube.FACES.BACK, [2, 1, 2, 1]],
       [Cube.FACES.RIGHT, [2, 1, 2, 1]],
     ]).get(face);
